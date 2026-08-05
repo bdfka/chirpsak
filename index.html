@@ -16,761 +16,536 @@
             --border: rgba(0, 150, 255, 0.2);
             --success: #00ff88;
             --danger: #ff4477;
+            --hashtag: #00ccaa;
+            --mention: #ffaa00;
+            --white: #ffffff;
+            --gray: #888888;
+            --blue: #0088ff;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+            background:var(--bg);color:var(--text);
+            width:100vw;height:100vh;overflow:hidden;
+            display:flex;flex-direction:column;
         }
-
-        .bg-animation {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
+        .bg-animation{
+            position:fixed;top:0;left:0;width:100%;height:100%;
+            pointer-events:none;z-index:0;
             background:
-                radial-gradient(ellipse at 20% 50%, rgba(0, 120, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(0, 180, 255, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(0, 100, 255, 0.05) 0%, transparent 50%);
+                radial-gradient(ellipse at 20% 50%,rgba(0,120,255,0.08) 0%,transparent 50%),
+                radial-gradient(ellipse at 80% 20%,rgba(0,180,255,0.06) 0%,transparent 50%),
+                radial-gradient(ellipse at 50% 80%,rgba(0,100,255,0.05) 0%,transparent 50%);
         }
-
-        .grid-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.05;
+        .grid-overlay{
+            position:fixed;top:0;left:0;width:100%;height:100%;
+            pointer-events:none;z-index:0;opacity:0.05;
             background-image:
-                linear-gradient(rgba(0, 150, 255, 0.3) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 150, 255, 0.3) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
+                linear-gradient(rgba(0,150,255,0.3) 1px,transparent 1px),
+                linear-gradient(90deg,rgba(0,150,255,0.3) 1px,transparent 1px);
+            background-size:50px 50px;
+            animation:gridMove 20s linear infinite;
         }
-
-        @keyframes gridMove {
-            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
-            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        @keyframes gridMove{
+            0%{transform:perspective(500px) rotateX(60deg) translateY(0)}
+            100%{transform:perspective(500px) rotateX(60deg) translateY(50px)}
         }
-
-        .particle {
-            position: fixed;
-            pointer-events: none;
-            z-index: 0;
-            width: 2px; height: 2px;
-            background: var(--primary);
-            border-radius: 50%;
-            box-shadow: 0 0 6px var(--primary-glow), 0 0 12px var(--primary);
-            animation: floatUp linear infinite;
+        .particle{
+            position:fixed;pointer-events:none;z-index:0;
+            width:2px;height:2px;background:var(--primary);
+            border-radius:50%;
+            box-shadow:0 0 6px var(--primary-glow),0 0 12px var(--primary);
+            animation:floatUp linear infinite;
         }
-
-        @keyframes floatUp {
-            0% { transform: translateY(100vh) scale(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        @keyframes floatUp{
+            0%{transform:translateY(100vh) scale(0);opacity:0}
+            10%{opacity:1}90%{opacity:1}
+            100%{transform:translateY(-10vh) scale(1.5);opacity:0}
         }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 700px;
-            padding: 20px;
+        .app{position:relative;z-index:1;width:100%;height:100vh;display:flex;flex-direction:column}
+        .navbar{
+            z-index:100;background:var(--card-bg);
+            backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border);
+            padding:10px 20px;display:flex;justify-content:space-between;align-items:center;
+            box-shadow:0 5px 30px rgba(0,0,0,0.5);flex-shrink:0;
         }
-
-        .navbar {
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transform-style: preserve-3d;
-            transform: perspective(1000px) rotateX(2deg);
-            box-shadow:
-                0 10px 40px rgba(0, 0, 0, 0.5),
-                0 0 30px rgba(0, 136, 255, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin-bottom: 24px;
+        .logo{
+            font-size:22px;font-weight:800;
+            background:linear-gradient(135deg,var(--primary-glow),#fff,var(--primary));
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+            filter:drop-shadow(0 0 10px rgba(0,187,255,0.5));
+            cursor:pointer;text-decoration:none;
         }
-
-        .navbar:hover {
-            transform: perspective(1000px) rotateX(0deg) translateY(-2px);
-            box-shadow:
-                0 15px 50px rgba(0, 0, 0, 0.6),
-                0 0 40px rgba(0, 136, 255, 0.25),
-                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        .nav-actions{display:flex;gap:8px;align-items:center}
+        .verified-badge{
+            display:inline-flex;align-items:center;justify-content:center;
+            width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:bold;
+            box-shadow:0 0 10px rgba(0,136,255,0.5);animation:verifiedPulse 2s ease-in-out infinite;
         }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-glow), #ffffff, var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 10px rgba(0, 187, 255, 0.5));
-            letter-spacing: -1px;
-            text-decoration: none;
+        .verified-white{background:linear-gradient(135deg,#ffffff,#cccccc);color:#000;box-shadow:0 0 12px rgba(255,255,255,0.6)}
+        .verified-gray{background:linear-gradient(135deg,#888888,#666666);color:#fff;box-shadow:0 0 12px rgba(136,136,136,0.6)}
+        .verified-blue{background:linear-gradient(135deg,#0088ff,#00ccff);color:#fff;box-shadow:0 0 12px rgba(0,136,255,0.6)}
+        @keyframes verifiedPulse{
+            0%,100%{transform:scale(1)}50%{transform:scale(1.15)}
         }
-
-        .nav-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
+        .btn{
+            padding:8px 14px;border-radius:10px;border:none;cursor:pointer;
+            font-weight:600;font-size:12px;transition:all 0.3s ease;
+            display:inline-flex;align-items:center;gap:5px;color:#fff;
         }
-
-        .verified-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 22px;
-            height: 22px;
-            background: linear-gradient(135deg, #0088ff, #00ccff);
-            border-radius: 50%;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-            box-shadow: 0 0 15px rgba(0, 136, 255, 0.6), 0 0 30px rgba(0, 187, 255, 0.3);
-            animation: verifiedPulse 2s ease-in-out infinite;
+        .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 3px 12px rgba(0,136,255,0.4)}
+        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(0,136,255,0.6)}
+        .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+        .btn-outline:hover{border-color:var(--primary);box-shadow:0 0 12px rgba(0,136,255,0.3);background:rgba(0,136,255,0.1)}
+        .btn-danger{background:var(--danger)}
+        .btn-icon{
+            width:42px;height:42px;border-radius:50%;
+            background:linear-gradient(135deg,var(--primary),var(--accent));
+            border:none;color:#fff;font-size:20px;cursor:pointer;
+            box-shadow:0 4px 18px rgba(0,136,255,0.4);transition:all 0.3s ease;
+            display:flex;align-items:center;justify-content:center;
+            position:fixed;bottom:20px;right:20px;z-index:150;
         }
-
-        @keyframes verifiedPulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(0, 136, 255, 0.6), 0 0 30px rgba(0, 187, 255, 0.3); }
-            50% { box-shadow: 0 0 25px rgba(0, 136, 255, 0.9), 0 0 50px rgba(0, 187, 255, 0.6); }
+        .btn-icon:hover{transform:scale(1.1);box-shadow:0 6px 25px rgba(0,136,255,0.7)}
+        .layout{display:flex;flex:1;overflow:hidden}
+        .sidebar{
+            width:240px;background:var(--card-bg);backdrop-filter:blur(20px);
+            border-right:1px solid var(--border);padding:14px;
+            overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;gap:8px;
         }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 12px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+        .main-content{flex:1;overflow-y:auto;padding:16px 20px}
+        .card{
+            background:var(--card-bg);backdrop-filter:blur(20px);
+            border:1px solid var(--border);border-radius:14px;
+            padding:16px;margin-bottom:12px;
+            box-shadow:0 6px 20px rgba(0,0,0,0.4),0 0 12px rgba(0,136,255,0.06);
+            transition:all 0.3s ease;animation:cardAppear 0.5s ease-out;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white;
-            box-shadow: 0 4px 20px rgba(0, 136, 255, 0.4), 0 0 30px rgba(0, 136, 255, 0.2);
+        @keyframes cardAppear{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
+        .card:hover{border-color:rgba(0,150,255,0.4);box-shadow:0 10px 30px rgba(0,0,0,0.5),0 0 25px rgba(0,136,255,0.12)}
+        .post-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+        .post-author{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;cursor:pointer}
+        .post-author:hover{color:var(--primary-glow)}
+        .post-avatar{
+            width:34px;height:34px;border-radius:50%;overflow:hidden;
+            background:linear-gradient(135deg,var(--primary),var(--accent));
+            display:flex;align-items:center;justify-content:center;
+            font-size:14px;box-shadow:0 0 10px rgba(0,136,255,0.3);flex-shrink:0;
+            color:#fff;font-weight:700;
         }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(0, 136, 255, 0.6), 0 0 50px rgba(0, 187, 255, 0.4);
+        .post-avatar img{width:100%;height:100%;object-fit:cover}
+        .post-time{color:var(--text-dim);font-size:10px}
+        .post-content{font-size:14px;line-height:1.5;margin-bottom:10px;color:#dde4ff;word-break:break-word}
+        .mention{color:var(--mention);cursor:pointer;font-weight:600}
+        .mention:hover{text-decoration:underline}
+        .hashtag{color:var(--hashtag);cursor:pointer;font-weight:600}
+        .hashtag:hover{text-decoration:underline}
+        .post-actions{display:flex;gap:12px}
+        .action-btn{
+            background:none;border:none;color:var(--text-dim);cursor:pointer;
+            font-size:12px;display:flex;align-items:center;gap:4px;
+            padding:5px 10px;border-radius:6px;transition:all 0.3s ease;
         }
-
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
-            transform: rotate(45deg);
-            animation: btnShine 3s infinite;
+        .action-btn:hover{color:var(--primary-glow);background:rgba(0,136,255,0.1)}
+        .action-btn.liked{color:#ff4477;animation:heartBeat 0.6s ease}
+        @keyframes heartBeat{0%{transform:scale(1)}25%{transform:scale(1.3)}50%{transform:scale(0.9)}100%{transform:scale(1)}}
+        input,textarea,select{
+            width:100%;padding:10px 14px;background:rgba(0,30,60,0.5);
+            border:1px solid var(--border);border-radius:10px;
+            color:var(--text);font-size:13px;outline:none;
+            font-family:inherit;transition:all 0.3s ease;
         }
-
-        @keyframes btnShine {
-            0% { left: -100%; }
-            100% { left: 200%; }
+        textarea{resize:vertical;min-height:100px}
+        input:focus,textarea:focus,select:focus{
+            border-color:var(--primary);box-shadow:0 0 18px rgba(0,136,255,0.3);background:rgba(0,40,80,0.5)
         }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-            backdrop-filter: blur(10px);
+        select{appearance:none;cursor:pointer}
+        .modal-overlay{
+            display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+            background:rgba(0,0,0,0.7);backdrop-filter:blur(5px);
+            z-index:200;justify-content:center;align-items:center;
         }
-
-        .btn-outline:hover {
-            border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(0, 136, 255, 0.3);
-            background: rgba(0, 136, 255, 0.1);
+        .modal-overlay.active{display:flex}
+        .modal{
+            background:rgba(10,10,35,0.95);backdrop-filter:blur(30px);
+            border:1px solid var(--border);border-radius:18px;
+            padding:24px;max-width:460px;width:90%;max-height:90vh;overflow-y:auto;
+            box-shadow:0 20px 60px rgba(0,0,0,0.8),0 0 60px rgba(0,136,255,0.2);
+            animation:modalIn 0.4s ease;
         }
-
-        .btn-sm {
-            padding: 6px 14px;
-            font-size: 12px;
-            border-radius: 8px;
+        @keyframes modalIn{0%{opacity:0;transform:scale(0.85) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+        .modal-close{background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer}
+        .modal-close:hover{color:var(--danger)}
+        .toast{
+            position:fixed;top:16px;right:16px;z-index:300;
+            padding:12px 18px;border-radius:10px;font-weight:600;font-size:13px;
+            backdrop-filter:blur(20px);
+            animation:toastIn 0.4s ease,toastOut 0.4s ease 3s forwards;
         }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 20px;
-            transform-style: preserve-3d;
-            transform: perspective(1000px) rotateX(1deg);
-            box-shadow:
-                0 8px 30px rgba(0, 0, 0, 0.4),
-                0 0 20px rgba(0, 136, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            animation: cardAppear 0.6s ease-out;
+        @keyframes toastIn{0%{opacity:0;transform:translateX(60px)}100%{opacity:1;transform:translateX(0)}}
+        @keyframes toastOut{0%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(60px)}}
+        .toast-success{background:rgba(0,255,136,0.2);border:1px solid rgba(0,255,136,0.4);color:#00ff88}
+        .toast-error{background:rgba(255,68,119,0.2);border:1px solid rgba(255,68,119,0.4);color:#ff4477}
+        .profile-avatar-large{
+            width:80px;height:80px;border-radius:50%;overflow:hidden;
+            background:linear-gradient(135deg,var(--primary),var(--accent));
+            display:flex;align-items:center;justify-content:center;
+            font-size:32px;margin:0 auto 12px;
+            box-shadow:0 0 25px rgba(0,136,255,0.4);color:#fff;font-weight:700;
         }
-
-        @keyframes cardAppear {
-            0% { opacity: 0; transform: perspective(1000px) rotateX(5deg) translateY(20px); }
-            100% { opacity: 1; transform: perspective(1000px) rotateX(1deg) translateY(0); }
+        .profile-avatar-large img{width:100%;height:100%;object-fit:cover}
+        .subscribe-btn{padding:8px 22px;border-radius:18px;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.3s ease}
+        .subscribe-btn.follow{background:var(--primary);color:#fff;border:none}
+        .subscribe-btn.unfollow{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+        .hashtag-list{display:flex;flex-wrap:wrap;gap:6px}
+        .hashtag-item{
+            padding:5px 12px;background:rgba(0,204,170,0.15);
+            border:1px solid rgba(0,204,170,0.3);border-radius:16px;
+            cursor:pointer;font-size:12px;color:var(--hashtag);transition:all 0.3s ease;
         }
-
-        .card:hover {
-            transform: perspective(1000px) rotateX(0deg) translateY(-4px);
-            box-shadow:
-                0 15px 40px rgba(0, 0, 0, 0.5),
-                0 0 40px rgba(0, 136, 255, 0.2);
-            border-color: rgba(0, 150, 255, 0.4);
+        .hashtag-item:hover{background:rgba(0,204,170,0.3);box-shadow:0 0 12px rgba(0,204,170,0.3)}
+        .settings-section{margin-bottom:16px}
+        .settings-section h4{color:var(--primary-glow);margin-bottom:8px;font-size:13px}
+        .admin-btn{
+            position:fixed;bottom:72px;right:20px;z-index:150;
+            width:32px;height:32px;border-radius:50%;
+            background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);
+            color:rgba(255,255,255,0.4);cursor:pointer;font-size:12px;
+            transition:all 0.3s ease;display:flex;align-items:center;justify-content:center;
         }
-
-        .post-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
+        .admin-btn:hover{color:var(--primary-glow);border-color:var(--primary);box-shadow:0 0 10px rgba(0,136,255,0.3)}
+        .admin-console{
+            display:none;position:fixed;bottom:115px;right:20px;z-index:150;
+            background:rgba(10,10,30,0.95);border:1px solid var(--border);
+            border-radius:12px;padding:14px;width:260px;
+            box-shadow:0 12px 35px rgba(0,0,0,0.7);
         }
-
-        .post-author {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .post-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 0 15px rgba(0, 136, 255, 0.4);
-        }
-
-        .post-time {
-            color: var(--text-dim);
-            font-size: 12px;
-        }
-
-        .post-content {
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 16px;
-            color: #dde4ff;
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 20px;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: var(--text-dim);
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .action-btn:hover {
-            color: var(--primary-glow);
-            background: rgba(0, 136, 255, 0.1);
-            box-shadow: 0 0 20px rgba(0, 136, 255, 0.2);
-        }
-
-        .action-btn.liked {
-            color: #ff4477;
-            animation: heartBeat 0.6s ease;
-        }
-
-        @keyframes heartBeat {
-            0% { transform: scale(1); }
-            25% { transform: scale(1.3); }
-            50% { transform: scale(0.9); }
-            100% { transform: scale(1); }
-        }
-
-        .auth-form, .post-form {
-            max-width: 450px;
-            margin: 0 auto;
-        }
-
-        .auth-form h2, .post-form h2 {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 24px;
-            background: linear-gradient(135deg, var(--primary-glow), white);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-align: center;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .input-group input, .input-group textarea {
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(0, 30, 60, 0.5);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            color: var(--text);
-            font-size: 15px;
-            transition: all 0.3s ease;
-            outline: none;
-            font-family: inherit;
-        }
-
-        .input-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .input-group input:focus, .input-group textarea:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(0, 136, 255, 0.3), 0 0 40px rgba(0, 136, 255, 0.1);
-            background: rgba(0, 40, 80, 0.5);
-        }
-
-        .input-group input::placeholder, .input-group textarea::placeholder {
-            color: rgba(136, 170, 204, 0.5);
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 200;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--card-bg);
-            backdrop-filter: blur(30px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 32px;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 60px rgba(0, 136, 255, 0.2);
-            animation: modalIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes modalIn {
-            0% { opacity: 0; transform: scale(0.8) translateY(30px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-dim);
-            font-size: 24px;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .modal-close:hover {
-            color: var(--danger);
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 300;
-            padding: 16px 24px;
-            border-radius: 14px;
-            font-weight: 600;
-            backdrop-filter: blur(20px);
-            animation: toastIn 0.4s ease, toastOut 0.4s ease 3s forwards;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        @keyframes toastIn {
-            0% { opacity: 0; transform: translateX(100px); }
-            100% { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes toastOut {
-            0% { opacity: 1; transform: translateX(0); }
-            100% { opacity: 0; transform: translateX(100px); }
-        }
-
-        .toast-success {
-            background: rgba(0, 255, 136, 0.2);
-            border: 1px solid rgba(0, 255, 136, 0.4);
-            color: #00ff88;
-        }
-
-        .toast-error {
-            background: rgba(255, 68, 119, 0.2);
-            border: 1px solid rgba(255, 68, 119, 0.4);
-            color: #ff4477;
-        }
-
-        .loader {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(0, 136, 255, 0.3);
-            border-top: 2px solid var(--primary-glow);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
-        }
-
-        @media (max-width: 600px) {
-            .container { padding: 10px; }
-            .navbar { padding: 12px 16px; border-radius: 16px; }
-            .logo { font-size: 20px; }
-            .card { padding: 16px; border-radius: 16px; }
-            .btn { padding: 8px 16px; font-size: 13px; }
-        }
+        .admin-console.active{display:block;animation:modalIn 0.3s ease}
+        .admin-console h5{color:var(--primary-glow);margin-bottom:8px;font-size:13px}
+        .admin-console input,.admin-console select{width:100%;padding:6px;margin-bottom:6px;font-size:11px}
+        .admin-console .hint{color:var(--text-dim);font-size:10px;margin-bottom:6px}
+        label{display:block;color:var(--text-dim);font-size:11px;margin-bottom:3px}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+        @media(max-width:768px){.sidebar{display:none}.btn-icon{bottom:14px;right:14px}}
+        .avatar-upload{cursor:pointer;text-align:center;color:var(--primary);font-size:12px}
     </style>
 </head>
 <body>
-
     <div class="bg-animation"></div>
     <div class="grid-overlay"></div>
     <div id="particles"></div>
     <div id="toastContainer"></div>
 
-    <div class="container">
+    <div class="app">
         <nav class="navbar">
-            <a href="#" class="logo" onclick="showFeed()">🐤 Chirper</a>
+            <a class="logo" onclick="showPage('feed')">🐤 Chirper</a>
             <div class="nav-actions" id="navActions">
                 <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">Войти</button>
                 <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">Регистрация</button>
             </div>
         </nav>
-
-        <div id="content"></div>
-    </div>
-
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 style="color: var(--primary-glow);">Вход</h2>
-                <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
-            </div>
-            <div class="input-group">
-                <input type="email" id="loginEmail" placeholder="Email">
-            </div>
-            <div class="input-group">
-                <input type="password" id="loginPassword" placeholder="Пароль">
-            </div>
-            <button class="btn btn-primary" style="width:100%;" onclick="login()">Войти</button>
+        <div class="layout">
+            <aside class="sidebar" id="sidebar">
+                <button class="btn btn-outline" onclick="showPage('feed')" style="width:100%">📡 Лента</button>
+                <button class="btn btn-outline" onclick="showPage('hashtags')" style="width:100%">🔥 Топ хештегов</button>
+                <button class="btn btn-outline" onclick="openModal('settingsModal')" style="width:100%" id="settingsBtn" disabled>⚙ Настройки</button>
+                <div id="subscriptionsBlock" style="margin-top:8px"></div>
+            </aside>
+            <main class="main-content" id="content"></main>
         </div>
     </div>
 
+    <button class="btn-icon" onclick="openModal('postModal')">+</button>
+    <button class="admin-btn" onclick="toggleAdminConsole()">⚙</button>
+
+    <div class="admin-console" id="adminConsole">
+        <h5>🔐 Админ-консоль</h5>
+        <input type="password" id="adminPassword" placeholder="Пароль">
+        <label>Тип галочки</label>
+        <select id="adminBadgeType">
+            <option value="white">Белая</option>
+            <option value="gray">Серая</option>
+            <option value="blue">Синяя</option>
+        </select>
+        <input type="text" id="adminCommand" placeholder="verify ник">
+        <div class="hint">verify [ник] — выдать галочку</div>
+        <button class="btn btn-primary btn-sm" onclick="execAdmin()" style="width:100%">OK</button>
+        <div id="adminResult" style="margin-top:5px;font-size:10px"></div>
+    </div>
+
+    <!-- Пост -->
+    <div class="modal-overlay" id="postModal">
+        <div class="modal">
+            <div class="modal-header"><h3 style="color:var(--primary-glow)">Новый чирик</h3><button class="modal-close" onclick="closeModal('postModal')">&times;</button></div>
+            <textarea id="newPostContent" placeholder="Что нового? @пользователь #хештег" maxlength="280"></textarea>
+            <div style="margin-top:6px;font-size:10px;color:var(--text-dim)"><span id="charCount">0</span>/280 • @упоминание • #хештег</div>
+            <button class="btn btn-primary" onclick="publishPost()" style="margin-top:10px;width:100%">🚀 Опубликовать</button>
+        </div>
+    </div>
+
+    <!-- Вход -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <div class="modal-header"><h3 style="color:var(--primary-glow)">Вход</h3><button class="modal-close" onclick="closeModal('loginModal')">&times;</button></div>
+            <input type="email" id="loginEmail" placeholder="Email" style="margin-bottom:8px">
+            <input type="password" id="loginPassword" placeholder="Пароль" style="margin-bottom:8px">
+            <button class="btn btn-primary" onclick="login()" style="width:100%">Войти</button>
+        </div>
+    </div>
+
+    <!-- Регистрация -->
     <div class="modal-overlay" id="registerModal">
         <div class="modal">
-            <div class="modal-header">
-                <h2 style="color: var(--primary-glow);">Регистрация</h2>
-                <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+            <div class="modal-header"><h3 style="color:var(--primary-glow)">Регистрация</h3><button class="modal-close" onclick="closeModal('registerModal')">&times;</button></div>
+            <input type="text" id="regUsername" placeholder="Имя" style="margin-bottom:8px">
+            <input type="email" id="regEmail" placeholder="Email" style="margin-bottom:8px">
+            <input type="password" id="regPassword" placeholder="Пароль" style="margin-bottom:8px">
+            <button class="btn btn-primary" onclick="register()" style="width:100%">Создать</button>
+        </div>
+    </div>
+
+    <!-- Настройки -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header"><h3 style="color:var(--primary-glow)">⚙ Настройки</h3><button class="modal-close" onclick="closeModal('settingsModal')">&times;</button></div>
+            <div class="settings-section">
+                <h4>Аватар</h4>
+                <input type="file" id="avatarFile" accept="image/*" style="margin-bottom:6px">
+                <button class="btn btn-primary btn-sm" onclick="uploadAvatar()">Загрузить</button>
             </div>
-            <div class="input-group">
-                <input type="text" id="regUsername" placeholder="Имя пользователя">
+            <div class="settings-section">
+                <h4>Сменить ник</h4>
+                <input type="text" id="newUsername" placeholder="Новый ник" style="margin-bottom:6px">
+                <button class="btn btn-primary btn-sm" onclick="changeUsername()">Сменить</button>
             </div>
-            <div class="input-group">
-                <input type="email" id="regEmail" placeholder="Email">
+            <div class="settings-section">
+                <h4>Описание</h4>
+                <textarea id="newBio" placeholder="О себе..." maxlength="200" style="min-height:60px;margin-bottom:6px"></textarea>
+                <button class="btn btn-primary btn-sm" onclick="changeBio()">Сохранить</button>
             </div>
-            <div class="input-group">
-                <input type="password" id="regPassword" placeholder="Пароль">
+            <div class="settings-section">
+                <h4>Сменить пароль</h4>
+                <input type="password" id="oldPassword" placeholder="Старый пароль" style="margin-bottom:6px">
+                <input type="password" id="newPassword" placeholder="Новый пароль" style="margin-bottom:6px">
+                <input type="email" id="confirmEmail" placeholder="Email для подтверждения" style="margin-bottom:6px">
+                <button class="btn btn-danger btn-sm" onclick="changePassword()">Сменить пароль</button>
             </div>
-            <button class="btn btn-primary" style="width:100%;" onclick="register()">Создать аккаунт</button>
         </div>
     </div>
 
     <script>
-        const API_URL = 'https://chirper-api-abc.onrender.com';
-        let userId = localStorage.getItem('chirper_user_id');
-        let username = localStorage.getItem('chirper_username');
-        let verified = localStorage.getItem('chirper_verified') === 'true';
+        const API = 'https://chirper-api-abc.onrender.com';
+        const ADMIN_PASS = 'bdfkatop123';
+        let uid = localStorage.getItem('uid');
+        let uname = localStorage.getItem('uname');
+        let vrf = localStorage.getItem('vrf');
+        let vrfType = localStorage.getItem('vrf_type') || '';
+        let subs = JSON.parse(localStorage.getItem('subs') || '[]');
+        let currentPage = 'feed';
+        let profileUser = null;
 
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (4 + Math.random() * 8) + 's';
-                particle.style.animationDelay = Math.random() * 8 + 's';
-                particle.style.width = (1 + Math.random() * 3) + 'px';
-                particle.style.height = particle.style.width;
-                container.appendChild(particle);
+        function createParticles(){
+            const c=document.getElementById('particles');
+            for(let i=0;i<50;i++){
+                const p=document.createElement('div');
+                p.className='particle';
+                p.style.left=Math.random()*100+'%';
+                p.style.animationDuration=(4+Math.random()*8)+'s';
+                p.style.animationDelay=Math.random()*8+'s';
+                p.style.width=(1+Math.random()*3)+'px';
+                p.style.height=p.style.width;
+                c.appendChild(p);
             }
         }
 
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3400);
+        function toast(m,t='success'){
+            const c=document.getElementById('toastContainer');
+            const d=document.createElement('div');
+            d.className=`toast toast-${t}`;
+            d.textContent=m;
+            c.appendChild(d);
+            setTimeout(()=>d.remove(),3400);
         }
 
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
+        function openModal(id){document.getElementById(id).classList.add('active')}
+        function closeModal(id){document.getElementById(id).classList.remove('active')}
+
+        function getBadgeClass(type){
+            if(type==='white') return 'verified-white';
+            if(type==='gray') return 'verified-gray';
+            return 'verified-blue';
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
+        function getBadgeSymbol(type){
+            if(type==='white') return '◇';
+            if(type==='gray') return '◆';
+            return '✓';
         }
 
-        async function apiCall(method, endpoint, data = null) {
-            const headers = { 'Content-Type': 'application/json' };
-            try {
-                const response = await fetch(`${API_URL}${endpoint}`, {
-                    method,
-                    headers,
-                    body: data ? JSON.stringify(data) : null
-                });
-                const result = await response.json();
-                if (!response.ok) {
-                    throw new Error(result.error || 'Ошибка');
-                }
-                return result;
-            } catch (error) {
-                showToast(error.message, 'error');
-                return null;
-            }
+        function badgeHtml(v,t){
+            if(!v||v==='false') return '';
+            const cls=getBadgeClass(t||'blue');
+            const sym=getBadgeSymbol(t||'blue');
+            return `<span class="verified-badge ${cls}" title="${t||'blue'}">${sym}</span>`;
         }
 
-        async function register() {
-            const usernameVal = document.getElementById('regUsername').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value;
-            
-            const result = await apiCall('POST', '/register', { 
-                username: usernameVal, 
-                email: email, 
-                password: password 
-            });
-            
-            if (result) {
-                userId = result.user_id;
-                username = result.username;
-                verified = result.verified;
-                localStorage.setItem('chirper_user_id', userId);
-                localStorage.setItem('chirper_username', username);
-                localStorage.setItem('chirper_verified', verified);
-                closeModal('registerModal');
-                updateNav();
-                showFeed();
-                showToast(`Добро пожаловать, ${username}!`, 'success');
-            }
+        async function api(method, endpoint, data=null){
+            const h={'Content-Type':'application/json'};
+            try{
+                const r=await fetch(`${API}${endpoint}`,{method,headers:h,body:data?JSON.stringify(data):null});
+                const j=await r.json();
+                if(!r.ok) throw new Error(j.error||'Error');
+                return j;
+            }catch(e){toast(e.message,'error');return null}
         }
 
-        async function login() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            
-            const result = await apiCall('POST', '/login', { 
-                email: email, 
-                password: password 
-            });
-            
-            if (result) {
-                userId = result.user_id;
-                username = result.username;
-                verified = result.verified;
-                localStorage.setItem('chirper_user_id', userId);
-                localStorage.setItem('chirper_username', username);
-                localStorage.setItem('chirper_verified', verified);
-                closeModal('loginModal');
-                updateNav();
-                showFeed();
-                showToast(`С возвращением, ${username}!`, 'success');
+        async function apiForm(endpoint, formData){
+            try{
+                const r=await fetch(`${API}${endpoint}`,{method:'POST',body:formData});
+                const j=await r.json();
+                if(!r.ok) throw new Error(j.error||'Error');
+                return j;
+            }catch(e){toast(e.message,'error');return null}
+        }
+
+        // Админ
+        function toggleAdminConsole(){
+            document.getElementById('adminConsole').classList.toggle('active');
+        }
+        async function execAdmin(){
+            const pw=document.getElementById('adminPassword').value;
+            const cmd=document.getElementById('adminCommand').value.trim();
+            const type=document.getElementById('adminBadgeType').value;
+            const res=document.getElementById('adminResult');
+            if(pw!==ADMIN_PASS){res.innerHTML='<span style="color:#f44">Неверный пароль</span>';return}
+            if(!cmd.startsWith('verify ')){res.innerHTML='<span style="color:#f44">verify [ник]</span>';return}
+            const target=cmd.replace('verify ','').trim();
+            const data=await api('POST','/verify',{username:target,badge_type:type});
+            if(data){
+                res.innerHTML=`<span style="color:#0f8">✅ ${data.message}</span>`;
+                if(uname===target){vrf='true';vrfType=type;localStorage.setItem('vrf','true');localStorage.setItem('vrf_type',type);updateNav()}
+                showPage(currentPage);
             }
         }
 
-        function logout() {
-            userId = null;
-            username = null;
-            verified = false;
-            localStorage.clear();
-            updateNav();
-            showFeed();
+        // Аватар
+        async function uploadAvatar(){
+            const file=document.getElementById('avatarFile').files[0];
+            if(!file){toast('Выберите файл','error');return}
+            if(!uid){toast('Войдите','error');return}
+            const fd=new FormData();
+            fd.append('avatar',file);
+            fd.append('user_id',uid);
+            const data=await apiForm('/upload-avatar',fd);
+            if(data) toast('Аватар обновлён!');
         }
 
-        function updateNav() {
-            const navActions = document.getElementById('navActions');
-            if (userId) {
-                const vBadge = verified ? '<span class="verified-badge">✓</span>' : '';
-                navActions.innerHTML = `
-                    <span style="font-weight:600;">${username}</span> ${vBadge}
-                    <button class="btn btn-outline btn-sm" onclick="showFeed()">Лента</button>
-                    <button class="btn btn-primary btn-sm" onclick="logout()">Выйти</button>
-                `;
-            } else {
-                navActions.innerHTML = `
-                    <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">Войти</button>
-                    <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">Регистрация</button>
-                `;
+        // Регистрация/Вход
+        async function register(){
+            const u=document.getElementById('regUsername').value.trim();
+            const e=document.getElementById('regEmail').value.trim();
+            const p=document.getElementById('regPassword').value;
+            const r=await api('POST','/register',{username:u,email:e,password:p});
+            if(r){
+                uid=r.user_id;uname=r.username;vrf=r.verified?'true':'false';vrfType=r.badge_type||'';
+                localStorage.setItem('uid',uid);localStorage.setItem('uname',uname);
+                localStorage.setItem('vrf',vrf);localStorage.setItem('vrf_type',vrfType);
+                closeModal('registerModal');updateNav();showPage('feed');
+                toast(`Добро пожаловать, ${uname}!`);
             }
         }
-
-        async function showFeed() {
-            const content = document.getElementById('content');
-            content.innerHTML = '<div style="text-align:center;padding:40px;">Загрузка...</div>';
-            
-            let formHtml = '';
-            if (userId) {
-                formHtml = `
-                    <div class="card">
-                        <textarea id="postContent" placeholder="Что нового?" maxlength="280"></textarea>
-                        <button class="btn btn-primary" onclick="createPost()" style="margin-top:10px;width:100%;">🚀 Чирикнуть</button>
-                    </div>
-                `;
-            }
-            
-            const posts = await apiCall('GET', '/posts');
-            
-            let postsHtml = '';
-            if (posts && posts.length > 0) {
-                postsHtml = posts.map(post => `
-                    <div class="card">
-                        <div class="post-header">
-                            <div class="post-author">
-                                <div class="post-avatar">${post.author.username[0]}</div>
-                                <span>${post.author.username}</span>
-                                ${post.author.verified ? '<span class="verified-badge">✓</span>' : ''}
-                            </div>
-                            <span class="post-time">${new Date(post.timestamp).toLocaleString('ru-RU')}</span>
-                        </div>
-                        <div class="post-content">${post.content}</div>
-                        <div class="post-actions">
-                            <button class="action-btn" onclick="likePost(${post.id}, this)">
-                                ❤️ <span class="likes-count">${post.likes}</span>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                postsHtml = '<div class="card" style="text-align:center;">Пока нет постов 🐤</div>';
-            }
-            
-            content.innerHTML = formHtml + '<h2 style="color:var(--primary-glow);margin-bottom:16px;">📡 Лента</h2>' + postsHtml;
-        }
-
-        async function createPost() {
-            const content = document.getElementById('postContent').value.trim();
-            if (!content) {
-                showToast('Напишите что-нибудь!', 'error');
-                return;
-            }
-            
-            const result = await apiCall('POST', '/post', { 
-                content: content, 
-                user_id: parseInt(userId) 
-            });
-            
-            if (result) {
-                showToast('Опубликовано! 🚀', 'success');
-                showFeed();
+        async function login(){
+            const e=document.getElementById('loginEmail').value.trim();
+            const p=document.getElementById('loginPassword').value;
+            const r=await api('POST','/login',{email:e,password:p});
+            if(r){
+                uid=r.user_id;uname=r.username;vrf=r.verified?'true':'false';vrfType=r.badge_type||'';
+                localStorage.setItem('uid',uid);localStorage.setItem('uname',uname);
+                localStorage.setItem('vrf',vrf);localStorage.setItem('vrf_type',vrfType);
+                closeModal('loginModal');updateNav();showPage('feed');
+                toast(`С возвращением, ${uname}!`);
             }
         }
-
-        async function likePost(postId, button) {
-            if (!userId) {
-                showToast('Войдите чтобы лайкать!', 'error');
-                return;
-            }
-            
-            const result = await apiCall('POST', `/like/${postId}`);
-            if (result) {
-                button.querySelector('.likes-count').textContent = result.likes;
-                button.classList.add('liked');
-                setTimeout(() => button.classList.remove('liked'), 600);
-            }
+        function logout(){
+            uid=null;uname=null;vrf='false';vrfType='';
+            localStorage.clear();subs=[];
+            updateNav();showPage('feed');
         }
 
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                e.target.classList.remove('active');
-            }
-        });
+        // Смена данных
+        async function changeUsername(){
+            const nu=document.getElementById('newUsername').value.trim();
+            if(!nu)return toast('Введите ник','error');
+            const data=await api('POST','/update-profile',{user_id:parseInt(uid),username:nu});
+            if(data){uname=nu;localStorage.setItem('uname',uname);updateNav();toast('Ник изменён!')}
+        }
+        async function changeBio(){
+            const bio=document.getElementById('newBio').value.trim();
+            const data=await api('POST','/update-profile',{user_id:parseInt(uid),bio});
+            if(data) toast('Описание сохранено!');
+        }
+        async function changePassword(){
+            const old=document.getElementById('oldPassword').value;
+            const np=document.getElementById('newPassword').value;
+            const email=document.getElementById('confirmEmail').value;
+            if(!old||!np||!email)return toast('Все поля обязательны','error');
+            const data=await api('POST','/change-password',{user_id:parseInt(uid),old_password:old,new_password:np,email});
+            if(data) toast('Пароль изменён! Проверьте почту.');
+        }
 
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                if (document.getElementById('loginModal').classList.contains('active')) login();
-                if (document.getElementById('registerModal').classList.contains('active')) register();
+        function updateNav(){
+            const a=document.getElementById('navActions');
+            const sb=document.getElementById('settingsBtn');
+            if(uid){
+                a.innerHTML=`<span style="font-weight:600">${uname}</span> ${badgeHtml(vrf,vrfType)}
+                    <button class="btn btn-outline btn-sm" onclick="showPage('feed')">Лента</button>
+                    <button class="btn btn-primary btn-sm" onclick="logout()">Выйти</button>`;
+                sb.disabled=false;
+            }else{
+                a.innerHTML=`<button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">Войти</button>
+                    <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">Регистрация</button>`;
+                sb.disabled=true;
             }
-        });
+            updateSubscriptions();
+        }
 
-        createParticles();
-        updateNav();
-        showFeed();
-    </script>
-</body>
-</html>
+        function updateSubscriptions(){
+            const b=document.getElementById('subscriptionsBlock');
+            if(!uid||subs.length===0){b.innerHTML='';return}
+            b.innerHTML='<div style="color:var(--text-dim);font-size:11px;margin-bottom:4px">Подписки</div>'+
+                subs.map(s=>`<button class="btn btn-outline btn-sm" onclick="showProfile('${s}')" style="width:100%">@${s}</button>`).join('');
+        }
+
+        function toggleSub(un){
+            const idx=subs.indexOf(un);
+            if(idx>=0){subs.splice(idx,1);toast(`Отписались от @${un}`)}
+            else{subs.push(un);toast(`Подписались на @${un}`)}
+            localStorage.setItem('subs',JSON.stringify(subs));
+            updateSubscriptions();
+            if(currentPage==='profile'&&profileUser) showProfile(profileUser);
+        }
+
+        function parseContent(text){
+            return text
+                .replace(/@(\w+)/g,'<span class="mention" onclick="showProfile(\'$1\')">@$1</span>')
+                .replace(/#(\w+)/g,'<span class="hashtag" onclick="showHashtag(\'$1\')">#$1</span>');
+        }
+
+        async function showPage(page, param=null){
+            currentPage=page;
+            const content=document.getElementById('content');
+            content.innerHTML='<div style="text-align:center;padding:40px">Загрузка...</div>';
+
+            if(page==='feed'){
+                const posts=await api('GET','/posts');
+                let html='';
+                if(posts&&posts.length>0){
+                    html=posts.map(p=>`
+                        <div class="card">
+                            <div class="post-header">
+                                <div class="post-author" onclick="showProfile('${p.author.username}')">
+                                    <div class="post-avatar">${p.author.avatar_url?`<img src="${p.author.avatar_url}"
