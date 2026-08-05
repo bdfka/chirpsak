@@ -16,7 +16,6 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
-# МОДЕЛИ
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
@@ -72,12 +71,12 @@ with app.app_context():
     db.create_all()
     if not User.query.filter_by(username='admin').first():
         admin = User(username='admin', email='admin@chirper.com', password=bcrypt.generate_password_hash('adminpass').decode('utf-8'), verified=True, badge_type='blue')
-        db.session.add(admin); db.session.commit()
+        db.session.add(admin)
+        db.session.commit()
 
 def u_dict(u):
     return {'id':u.id,'username':u.username,'verified':u.verified,'badge_type':u.badge_type,'bio':u.bio,'avatar_url':u.avatar_url,'online':u.online,'last_seen':u.last_seen.isoformat()}
 
-# API
 @app.route('/register', methods=['POST'])
 def register():
     d=request.get_json()
@@ -116,8 +115,13 @@ def posts():
 @app.route('/post', methods=['POST'])
 def create_post():
     d=request.get_json()
-    u=User.query.get(d['user_id'])
-    p=Post(content=d['content'][:280],user_id=u.id)
+    user_id=d.get('user_id')
+    if not user_id:return jsonify({'error':'user_id не передан'}),400
+    u=User.query.get(int(user_id))
+    if not u:return jsonify({'error':'Пользователь не найден'}),404
+    content=d.get('content','').strip()
+    if not content:return jsonify({'error':'Пустой пост'}),400
+    p=Post(content=content[:280],user_id=u.id)
     db.session.add(p);db.session.commit()
     return jsonify({'id':p.id})
 
@@ -244,7 +248,6 @@ def send_msg(cid):
     db.session.add(m);db.session.commit()
     return jsonify({'id':m.id,'sender':u_dict(User.query.get(m.sender_id)),'content':m.content,'timestamp':m.timestamp.isoformat()})
 
-# САЙТ
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
