@@ -31,7 +31,6 @@
             align-items: center;
         }
 
-        /* Анимированный фон */
         .bg-animation {
             position: fixed;
             top: 0; left: 0;
@@ -44,7 +43,6 @@
                 radial-gradient(ellipse at 50% 80%, rgba(0, 100, 255, 0.05) 0%, transparent 50%);
         }
 
-        /* Сетка */
         .grid-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -64,7 +62,6 @@
             100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
         }
 
-        /* Партиклы */
         .particle {
             position: fixed;
             pointer-events: none;
@@ -83,7 +80,6 @@
             100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
         }
 
-        /* Контейнер */
         .container {
             position: relative;
             z-index: 1;
@@ -92,7 +88,6 @@
             padding: 20px;
         }
 
-        /* Навбар с 3D */
         .navbar {
             position: sticky;
             top: 20px;
@@ -142,12 +137,6 @@
             align-items: center;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
         .verified-badge {
             display: inline-flex;
             align-items: center;
@@ -168,7 +157,6 @@
             50% { box-shadow: 0 0 25px rgba(0, 136, 255, 0.9), 0 0 50px rgba(0, 187, 255, 0.6); }
         }
 
-        /* Кнопки */
         .btn {
             padding: 10px 20px;
             border-radius: 12px;
@@ -194,10 +182,6 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 30px rgba(0, 136, 255, 0.6), 0 0 50px rgba(0, 187, 255, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
         }
 
         .btn-primary::after {
@@ -236,7 +220,6 @@
             border-radius: 8px;
         }
 
-        /* Карточки с 3D */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(20px);
@@ -267,7 +250,6 @@
             border-color: rgba(0, 150, 255, 0.4);
         }
 
-        /* Пост */
         .post-header {
             display: flex;
             justify-content: space-between;
@@ -344,7 +326,6 @@
             100% { transform: scale(1); }
         }
 
-        /* Формы */
         .auth-form, .post-form {
             max-width: 450px;
             margin: 0 auto;
@@ -394,15 +375,6 @@
             color: rgba(136, 170, 204, 0.5);
         }
 
-        .input-group .icon {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-dim);
-        }
-
-        /* Модальное окно */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -456,7 +428,6 @@
             color: var(--danger);
         }
 
-        /* Flash-сообщения */
         .toast {
             position: fixed;
             top: 20px;
@@ -492,7 +463,6 @@
             color: #ff4477;
         }
 
-        /* Загрузка */
         .loader {
             display: inline-block;
             width: 20px;
@@ -507,7 +477,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Скроллбар */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb {
@@ -518,7 +487,6 @@
             background: var(--primary);
         }
 
-        /* Мобильная адаптация */
         @media (max-width: 600px) {
             .container { padding: 10px; }
             .navbar { padding: 12px 16px; border-radius: 16px; }
@@ -530,17 +498,12 @@
 </head>
 <body>
 
-    <!-- Фон -->
     <div class="bg-animation"></div>
     <div class="grid-overlay"></div>
     <div id="particles"></div>
-
-    <!-- Toast-уведомления -->
     <div id="toastContainer"></div>
 
-    <!-- Контейнер -->
     <div class="container">
-        <!-- Навигация -->
         <nav class="navbar">
             <a href="#" class="logo" onclick="showFeed()">🐤 Chirper</a>
             <div class="nav-actions" id="navActions">
@@ -549,11 +512,9 @@
             </div>
         </nav>
 
-        <!-- Контент -->
         <div id="content"></div>
     </div>
 
-    <!-- Модалка: Вход -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal">
             <div class="modal-header">
@@ -566,14 +527,10 @@
             <div class="input-group">
                 <input type="password" id="loginPassword" placeholder="Пароль">
             </div>
-            <button class="btn btn-primary" style="width:100%;" onclick="login()">
-                <span id="loginLoader" style="display:none;" class="loader"></span>
-                Войти
-            </button>
+            <button class="btn btn-primary" style="width:100%;" onclick="login()">Войти</button>
         </div>
     </div>
 
-    <!-- Модалка: Регистрация -->
     <div class="modal-overlay" id="registerModal">
         <div class="modal">
             <div class="modal-header">
@@ -589,25 +546,16 @@
             <div class="input-group">
                 <input type="password" id="regPassword" placeholder="Пароль">
             </div>
-            <button class="btn btn-primary" style="width:100%;" onclick="register()">
-                <span id="regLoader" style="display:none;" class="loader"></span>
-                Создать аккаунт
-            </button>
+            <button class="btn btn-primary" style="width:100%;" onclick="register()">Создать аккаунт</button>
         </div>
     </div>
 
-    <!-- Модалка: Профиль -->
-    <div class="modal-overlay" id="profileModal">
-        <div class="modal" id="profileContent"></div>
-    </div>
-
     <script>
-        // ==================== КОНФИГУРАЦИЯ ====================
-        const API_URL = 'https://chirper-api-abc.onrender.com'; // Замените на URL вашего сервера
-        let token = localStorage.getItem('chirper_token');
-        let currentUser = JSON.parse(localStorage.getItem('chirper_user') || 'null');
+        const API_URL = 'https://chirper-api-abc.onrender.com';
+        let userId = localStorage.getItem('chirper_user_id');
+        let username = localStorage.getItem('chirper_username');
+        let verified = localStorage.getItem('chirper_verified') === 'true';
 
-        // ==================== ПАРТИКЛЫ ====================
         function createParticles() {
             const container = document.getElementById('particles');
             for (let i = 0; i < 50; i++) {
@@ -622,36 +570,6 @@
             }
         }
 
-        // ==================== API ====================
-        async function apiCall(method, endpoint, data = null) {
-            const headers = { 'Content-Type': 'application/json' };
-            if (token) headers['Authorization'] = `Bearer ${token}`;
-
-            try {
-                const response = await fetch(`${API_URL}${endpoint}`, {
-                    method,
-                    headers,
-                    body: data ? JSON.stringify(data) : null
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'Ошибка сервера');
-                }
-
-                return result;
-            } catch (error) {
-                if (error.message === 'Failed to fetch') {
-                    showToast('Сервер недоступен. Проверьте подключение.', 'error');
-                } else {
-                    showToast(error.message, 'error');
-                }
-                return null;
-            }
-        }
-
-        // ==================== UI ====================
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -669,82 +587,89 @@
             document.getElementById(id).classList.remove('active');
         }
 
-        function setLoading(buttonId, loaderId, isLoading) {
-            const btn = document.querySelector(`#${buttonId}`);
-            const loader = document.getElementById(loaderId);
-            if (isLoading) {
-                btn.disabled = true;
-                loader.style.display = 'inline-block';
-            } else {
-                btn.disabled = false;
-                loader.style.display = 'none';
+        async function apiCall(method, endpoint, data = null) {
+            const headers = { 'Content-Type': 'application/json' };
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method,
+                    headers,
+                    body: data ? JSON.stringify(data) : null
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Ошибка');
+                }
+                return result;
+            } catch (error) {
+                showToast(error.message, 'error');
+                return null;
             }
         }
 
-        // ==================== АВТОРИЗАЦИЯ ====================
         async function register() {
-            setLoading('registerModal', 'regLoader', true);
-            const username = document.getElementById('regUsername').value.trim();
+            const usernameVal = document.getElementById('regUsername').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
-
-            const result = await apiCall('POST', '/register', { username, email, password });
-            setLoading('registerModal', 'regLoader', false);
-
-            if (result && result.token) {
-                token = result.token;
-                currentUser = result.user;
-                localStorage.setItem('chirper_token', token);
-                localStorage.setItem('chirper_user', JSON.stringify(currentUser));
+            
+            const result = await apiCall('POST', '/register', { 
+                username: usernameVal, 
+                email: email, 
+                password: password 
+            });
+            
+            if (result) {
+                userId = result.user_id;
+                username = result.username;
+                verified = result.verified;
+                localStorage.setItem('chirper_user_id', userId);
+                localStorage.setItem('chirper_username', username);
+                localStorage.setItem('chirper_verified', verified);
                 closeModal('registerModal');
                 updateNav();
                 showFeed();
-                showToast(`Добро пожаловать, ${currentUser.username}! 🎉`, 'success');
+                showToast(`Добро пожаловать, ${username}!`, 'success');
             }
         }
 
         async function login() {
-            setLoading('loginModal', 'loginLoader', true);
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
-
-            const result = await apiCall('POST', '/login', { email, password });
-            setLoading('loginModal', 'loginLoader', false);
-
-            if (result && result.token) {
-                token = result.token;
-                currentUser = result.user;
-                localStorage.setItem('chirper_token', token);
-                localStorage.setItem('chirper_user', JSON.stringify(currentUser));
+            
+            const result = await apiCall('POST', '/login', { 
+                email: email, 
+                password: password 
+            });
+            
+            if (result) {
+                userId = result.user_id;
+                username = result.username;
+                verified = result.verified;
+                localStorage.setItem('chirper_user_id', userId);
+                localStorage.setItem('chirper_username', username);
+                localStorage.setItem('chirper_verified', verified);
                 closeModal('loginModal');
                 updateNav();
                 showFeed();
-                showToast(`С возвращением, ${currentUser.username}!`, 'success');
+                showToast(`С возвращением, ${username}!`, 'success');
             }
         }
 
         function logout() {
-            token = null;
-            currentUser = null;
-            localStorage.removeItem('chirper_token');
-            localStorage.removeItem('chirper_user');
+            userId = null;
+            username = null;
+            verified = false;
+            localStorage.clear();
             updateNav();
             showFeed();
-            showToast('Вы вышли из аккаунта', 'success');
         }
 
         function updateNav() {
             const navActions = document.getElementById('navActions');
-            if (currentUser) {
-                const verifiedHtml = currentUser.verified
-                    ? '<span class="verified-badge">✓</span>' : '';
+            if (userId) {
+                const vBadge = verified ? '<span class="verified-badge">✓</span>' : '';
                 navActions.innerHTML = `
-                    <div class="user-info">
-                        <span style="font-weight:600;">${currentUser.username}</span>
-                        ${verifiedHtml}
-                    </div>
+                    <span style="font-weight:600;">${username}</span> ${vBadge}
                     <button class="btn btn-outline btn-sm" onclick="showFeed()">Лента</button>
-                    <button class="btn btn-outline btn-sm" onclick="showProfile('${currentUser.username}')">Профиль</button>
                     <button class="btn btn-primary btn-sm" onclick="logout()">Выйти</button>
                 `;
             } else {
@@ -755,44 +680,35 @@
             }
         }
 
-        // ==================== ЛЕНТА ====================
         async function showFeed() {
             const content = document.getElementById('content');
-            content.innerHTML = '<div style="text-align:center;padding:40px;"><div class="loader"></div></div>';
-
-            // Форма создания поста
-            let postFormHtml = '';
-            if (currentUser) {
-                postFormHtml = `
-                    <div class="card post-form">
-                        <textarea id="postContent" placeholder="Что нового? (макс 280 символов)" maxlength="280"></textarea>
-                        <button class="btn btn-primary" onclick="createPost()" style="margin-top:12px;width:100%;">
-                            🚀 Чирикнуть
-                        </button>
+            content.innerHTML = '<div style="text-align:center;padding:40px;">Загрузка...</div>';
+            
+            let formHtml = '';
+            if (userId) {
+                formHtml = `
+                    <div class="card">
+                        <textarea id="postContent" placeholder="Что нового?" maxlength="280"></textarea>
+                        <button class="btn btn-primary" onclick="createPost()" style="margin-top:10px;width:100%;">🚀 Чирикнуть</button>
                     </div>
                 `;
             }
-
-            // Загрузка постов
+            
             const posts = await apiCall('GET', '/posts');
+            
             let postsHtml = '';
-
             if (posts && posts.length > 0) {
                 postsHtml = posts.map(post => `
                     <div class="card">
                         <div class="post-header">
                             <div class="post-author">
-                                <div class="post-avatar">${post.author.username[0].toUpperCase()}</div>
-                                <div>
-                                    <span onclick="showProfile('${post.author.username}')" style="cursor:pointer;">
-                                        ${post.author.username}
-                                    </span>
-                                    ${post.author.verified ? '<span class="verified-badge">✓</span>' : ''}
-                                </div>
+                                <div class="post-avatar">${post.author.username[0]}</div>
+                                <span>${post.author.username}</span>
+                                ${post.author.verified ? '<span class="verified-badge">✓</span>' : ''}
                             </div>
                             <span class="post-time">${new Date(post.timestamp).toLocaleString('ru-RU')}</span>
                         </div>
-                        <div class="post-content">${escapeHtml(post.content)}</div>
+                        <div class="post-content">${post.content}</div>
                         <div class="post-actions">
                             <button class="action-btn" onclick="likePost(${post.id}, this)">
                                 ❤️ <span class="likes-count">${post.likes}</span>
@@ -801,10 +717,10 @@
                     </div>
                 `).join('');
             } else {
-                postsHtml = '<div class="card" style="text-align:center;color:var(--text-dim);">Пока нет постов. Будьте первым! 🐤</div>';
+                postsHtml = '<div class="card" style="text-align:center;">Пока нет постов 🐤</div>';
             }
-
-            content.innerHTML = postFormHtml + '<h2 style="margin-bottom:16px;color:var(--primary-glow);">📡 Лента</h2>' + postsHtml;
+            
+            content.innerHTML = formHtml + '<h2 style="color:var(--primary-glow);margin-bottom:16px;">📡 Лента</h2>' + postsHtml;
         }
 
         async function createPost() {
@@ -813,108 +729,48 @@
                 showToast('Напишите что-нибудь!', 'error');
                 return;
             }
-            if (content.length > 280) {
-                showToast('Максимум 280 символов!', 'error');
-                return;
-            }
-
-            const result = await apiCall('POST', '/post', { content });
+            
+            const result = await apiCall('POST', '/post', { 
+                content: content, 
+                user_id: parseInt(userId) 
+            });
+            
             if (result) {
-                showToast('Чирик опубликован! 🚀', 'success');
+                showToast('Опубликовано! 🚀', 'success');
                 showFeed();
             }
         }
 
         async function likePost(postId, button) {
-            if (!currentUser) {
-                showToast('Войдите, чтобы лайкать!', 'error');
+            if (!userId) {
+                showToast('Войдите чтобы лайкать!', 'error');
                 return;
             }
-
+            
             const result = await apiCall('POST', `/like/${postId}`);
             if (result) {
-                const countSpan = button.querySelector('.likes-count');
-                countSpan.textContent = result.likes;
+                button.querySelector('.likes-count').textContent = result.likes;
                 button.classList.add('liked');
                 setTimeout(() => button.classList.remove('liked'), 600);
             }
         }
 
-        // ==================== ПРОФИЛЬ ====================
-        async function showProfile(username) {
-            const content = document.getElementById('content');
-            content.innerHTML = '<div style="text-align:center;padding:40px;"><div class="loader"></div></div>';
-
-            const data = await apiCall('GET', `/user/${username}`);
-            if (!data) {
-                showFeed();
-                return;
-            }
-
-            const { user, posts } = data;
-            const verifiedHtml = user.verified ? '<span class="verified-badge">✓</span> Проверенный автор' : '';
-
-            let postsHtml = '';
-            if (posts && posts.length > 0) {
-                postsHtml = posts.map(post => `
-                    <div class="card">
-                        <div class="post-header">
-                            <span class="post-time">${new Date(post.timestamp).toLocaleString('ru-RU')}</span>
-                        </div>
-                        <div class="post-content">${escapeHtml(post.content)}</div>
-                        <div class="post-actions">
-                            <span style="color:var(--text-dim);">❤️ ${post.likes}</span>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                postsHtml = '<div class="card" style="text-align:center;color:var(--text-dim);">Нет постов</div>';
-            }
-
-            content.innerHTML = `
-                <div class="card" style="text-align:center;">
-                    <div class="post-avatar" style="width:80px;height:80px;font-size:36px;margin:0 auto 16px;">
-                        ${user.username[0].toUpperCase()}
-                    </div>
-                    <h2>${escapeHtml(user.username)}</h2>
-                    <p style="color:var(--primary-glow);margin:8px 0;">${verifiedHtml}</p>
-                    <p style="color:var(--text-dim);">${escapeHtml(user.bio || '')}</p>
-                </div>
-                <h3 style="color:var(--primary-glow);margin:20px 0;">Посты</h3>
-                ${postsHtml}
-                <button class="btn btn-outline" onclick="showFeed()" style="margin-top:20px;">← Назад в ленту</button>
-            `;
-        }
-
-        // ==================== УТИЛИТЫ ====================
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Закрытие модалок по клику вне
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal-overlay')) {
                 e.target.classList.remove('active');
             }
         });
 
-        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (document.getElementById('loginModal').classList.contains('active')) login();
+                if (document.getElementById('registerModal').classList.contains('active')) register();
+            }
+        });
+
         createParticles();
         updateNav();
         showFeed();
-
-        // Обработка Enter в формах
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                if (document.getElementById('loginModal').classList.contains('active')) {
-                    login();
-                } else if (document.getElementById('registerModal').classList.contains('active')) {
-                    register();
-                }
-            }
-        });
     </script>
 </body>
 </html>
