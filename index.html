@@ -113,7 +113,7 @@
 <div class="modal-overlay" id="settingsModal"><div class="modal"><div class="modal-header"><h3 style="color:var(--primary-glow)">⚙ Настройки</h3><button class="modal-close" onclick="closeModal('settingsModal')">&times;</button></div><h4 style="font-size:12px;margin-bottom:4px">Аватар</h4><input type="file" id="avatarFile" accept="image/*" style="margin-bottom:6px"><button class="btn btn-primary btn-sm" onclick="uploadAvatar()">Загрузить</button><h4 style="font-size:12px;margin:10px 0 4px">Ник</h4><input type="text" id="newNick" placeholder="Новый ник" style="margin-bottom:6px"><button class="btn btn-primary btn-sm" onclick="changeNick()">Сменить</button><h4 style="font-size:12px;margin:10px 0 4px">Описание</h4><textarea id="newBio" placeholder="О себе..." maxlength="200" style="min-height:50px;margin-bottom:6px"></textarea><button class="btn btn-primary btn-sm" onclick="changeBio()">Сохранить</button><h4 style="font-size:12px;margin:10px 0 4px">Пароль</h4><input type="password" id="oldPass" placeholder="Старый" style="margin-bottom:4px"><input type="password" id="newPass" placeholder="Новый" style="margin-bottom:4px"><input type="email" id="confirmEmail" placeholder="Email" style="margin-bottom:6px"><button class="btn btn-danger btn-sm" onclick="changePass()">Сменить пароль</button></div></div>
 
 <script>
-const API='';
+const API='https://chirper-slk3.onrender.com';
 const ADMIN_PASS='bdfkatop123';
 let uid=localStorage.getItem('uid');
 let uname=localStorage.getItem('uname');
