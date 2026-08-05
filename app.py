@@ -2,6 +2,7 @@ from flask import Flask, send_from_directory
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/')
 @app.route('/<path:filename>')
