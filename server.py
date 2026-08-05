@@ -51,6 +51,9 @@ def register():
     email = data.get('email', '').strip()
     password = data.get('password', '')
     
+    if not username or not email or not password:
+        return jsonify({'error': 'Все поля обязательны'}), 400
+    
     if User.query.filter_by(username=username).first():
         return jsonify({'error': 'Имя занято'}), 400
     if User.query.filter_by(email=email).first():
@@ -62,18 +65,28 @@ def register():
     db.session.commit()
     
     token = create_access_token(identity=user.id)
-    return jsonify({'token': token, 'user': {'id': user.id, 'username': user.username, 'verified': user.verified}})
+    return jsonify({
+        'token': token, 
+        'user': {'id': user.id, 'username': user.username, 'verified': user.verified}
+    })
 
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     email = data.get('email', '')
     password = data.get('password', '')
+    
+    if not email or not password:
+        return jsonify({'error': 'Email и пароль обязательны'}), 400
+    
     user = User.query.filter_by(email=email).first()
     
     if user and bcrypt.check_password_hash(user.password, password):
         token = create_access_token(identity=user.id)
-        return jsonify({'token': token, 'user': {'id': user.id, 'username': user.username, 'verified': user.verified}})
+        return jsonify({
+            'token': token, 
+            'user': {'id': user.id, 'username': user.username, 'verified': user.verified}
+        })
     return jsonify({'error': 'Неверный email или пароль'}), 401
 
 @app.route('/posts', methods=['GET'])
@@ -90,22 +103,42 @@ def get_posts():
         })
     return jsonify(result)
 
-@app.route('/post', methods=['POST'])
+@app.route('/post', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def create_post():
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Нет данных'}), 400
+    
+    content = data.get('content', '').strip()
     user_id = get_jwt_identity()
-    content = request.get_json().get('content', '').strip()
-    if not content or len(content) > 280:
-        return jsonify({'error': 'Пост должен быть от 1 до 280 символов'}), 400
+    
+    if not content:
+        return jsonify({'error': 'Пост не может быть пустым'}), 400
+    if len(content) > 280:
+        return jsonify({'error': 'Максимум 280 символов'}), 400
     
     post = Post(content=content, user_id=user_id)
     db.session.add(post)
     db.session.commit()
-    return jsonify({'message': 'Пост создан!'})
+    
+    return jsonify({
+        'id': post.id,
+        'content': post.content,
+        'likes': 0,
+        'timestamp': post.timestamp.isoformat(),
+        'author': {'username': post.author.username, 'verified': post.author.verified}
+    })
 
-@app.route('/like/<int:post_id>', methods=['POST'])
+@app.route('/like/<int:post_id>', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def like(post_id):
+    if request.method == 'OPTIONS':
+        return '', 200
+    
     post = Post.query.get_or_404(post_id)
     post.likes += 1
     db.session.commit()
