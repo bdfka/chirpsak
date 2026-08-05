@@ -4,10 +4,9 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import os, uuid
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'super-secret-123')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chirper.db'
@@ -29,13 +28,6 @@ class User(db.Model):
     avatar_url = db.Column(db.String(300), default='')
     online = db.Column(db.Boolean, default=False)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-    posts = db.relationship('Post', backref='author', lazy=True)
-    sent_requests = db.relationship('FriendRequest', foreign_keys='FriendRequest.from_id', backref='sender', lazy=True)
-    received_requests = db.relationship('FriendRequest', foreign_keys='FriendRequest.to_id', backref='receiver', lazy=True)
-    friendships1 = db.relationship('Friendship', foreign_keys='Friendship.user1_id', backref='user1', lazy=True)
-    friendships2 = db.relationship('Friendship', foreign_keys='Friendship.user2_id', backref='user2', lazy=True)
-    messages = db.relationship('Message', backref='sender', lazy=True)
-    chat_members = db.relationship('ChatMember', backref='user', lazy=True)
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,13 +35,16 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     likes = db.Column(db.Integer, default=0)
+    author = db.relationship('User', backref='posts')
 
 class FriendRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     from_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     to_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    status = db.Column(db.String(10), default='pending')  # pending, accepted, rejected
+    status = db.Column(db.String(10), default='pending')
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    sender = db.relationship('User', foreign_keys=[from_id], backref='sent_requests')
+    receiver = db.relationship('User', foreign_keys=[to_id], backref='received_requests')
 
 class Friendship(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,8 +60,6 @@ class Chat(db.Model):
     is_group = db.Column(db.Boolean, default=False)
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    members = db.relationship('ChatMember', backref='chat', lazy=True)
-    messages = db.relationship('Message', backref='chat', lazy=True)
 
 class ChatMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -98,24 +91,6 @@ def user_dict(u):
         'id': u.id, 'username': u.username, 'verified': u.verified,
         'badge_type': u.badge_type, 'bio': u.bio, 'avatar_url': u.avatar_url,
         'online': u.online, 'last_seen': u.last_seen.isoformat()
-    }
-
-def msg_dict(m):
-    return {
-        'id': m.id, 'chat_id': m.chat_id, 'sender_id': m.sender_id,
-        'content': m.content, 'timestamp': m.timestamp.isoformat(),
-        'delivered': m.delivered, 'read': m.read,
-        'sender': user_dict(m.sender)
-    }
-
-def chat_dict(c, uid):
-    members = [user_dict(m.user) for m in c.members]
-    last_msg = Message.query.filter_by(chat_id=c.id).order_by(Message.timestamp.desc()).first()
-    return {
-        'id': c.id, 'name': c.name, 'description': c.description,
-        'avatar_url': c.avatar_url, 'is_group': c.is_group,
-        'created_by': c.created_by, 'members': members,
-        'last_message': msg_dict(last_msg) if last_msg else None
     }
 
 # ==================== АВТОРИЗАЦИЯ ====================
@@ -158,11 +133,7 @@ def heartbeat():
 @app.route('/posts', methods=['GET'])
 def get_posts():
     posts = Post.query.order_by(Post.timestamp.desc()).limit(50).all()
-    return jsonify([{
-        'id': p.id, 'content': p.content, 'likes': p.likes,
-        'timestamp': p.timestamp.isoformat(),
-        'author': user_dict(p.author)
-    } for p in posts])
+    return jsonify([{'id': p.id, 'content': p.content, 'likes': p.likes, 'timestamp': p.timestamp.isoformat(), 'author': user_dict(p.author)} for p in posts])
 
 @app.route('/post', methods=['POST'])
 def create_post():
@@ -182,12 +153,11 @@ def like(pid):
 def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
     posts = Post.query.filter_by(user_id=user.id).order_by(Post.timestamp.desc()).limit(30).all()
-    friends = get_friends_list(user)
     return jsonify({
         'user': user_dict(user),
         'posts': [{'id': p.id, 'content': p.content, 'likes': p.likes, 'timestamp': p.timestamp.isoformat(), 'author': user_dict(user)} for p in posts],
-        'friends': friends,
-        'friends_count': len(friends)
+        'friends': get_friends_list(user),
+        'friends_count': len(get_friends_list(user))
     })
 
 @app.route('/verify', methods=['POST'])
@@ -222,8 +192,11 @@ def change_password():
 
 @app.route('/upload-avatar', methods=['POST'])
 def upload_avatar():
+    if 'avatar' not in request.files:
+        return jsonify({'error': 'Нет файла'}), 400
     file = request.files['avatar']
-    user = User.query.get(request.form['user_id'])
+    user_id = request.form.get('user_id')
+    user = User.query.get(user_id)
     if not user: return jsonify({'error': 'Не найден'}), 404
     ext = file.filename.rsplit('.', 1)[-1].lower()
     if ext not in ('jpg','jpeg','png','gif','webp'): return jsonify({'error': 'Формат не поддерживается'}), 400
@@ -240,7 +213,8 @@ def get_friends_list(user):
     friends = []
     for f in Friendship.query.filter((Friendship.user1_id == user.id) | (Friendship.user2_id == user.id)).all():
         friend = f.user2 if f.user1_id == user.id else f.user1
-        friends.append(user_dict(friend))
+        # user2 и user1 - backref'ы из модели Friendship
+        friends.append(user_dict(User.query.get(friend.id)))
     return friends
 
 @app.route('/friends/<int:uid>', methods=['GET'])
@@ -271,8 +245,8 @@ def get_friend_requests(uid):
     incoming = FriendRequest.query.filter_by(to_id=uid, status='pending').all()
     outgoing = FriendRequest.query.filter_by(from_id=uid, status='pending').all()
     return jsonify({
-        'incoming': [{'id': r.id, 'from': user_dict(r.sender), 'timestamp': r.timestamp.isoformat()} for r in incoming],
-        'outgoing': [{'id': r.id, 'to': user_dict(r.receiver), 'timestamp': r.timestamp.isoformat()} for r in outgoing]
+        'incoming': [{'id': r.id, 'from': user_dict(User.query.get(r.from_id)), 'timestamp': r.timestamp.isoformat()} for r in incoming],
+        'outgoing': [{'id': r.id, 'to': user_dict(User.query.get(r.to_id)), 'timestamp': r.timestamp.isoformat()} for r in outgoing]
     })
 
 @app.route('/friend-request/<int:rid>/accept', methods=['POST'])
@@ -289,9 +263,10 @@ def reject_friend_request(rid):
     req.status = 'rejected'; db.session.commit()
     return jsonify({'message': 'Заявка отклонена'})
 
-@app.route('/mutual-friends/<int:uid1>/<int:uid2>', methods=['GET'])
-def mutual_friends(uid1, uid2):
-    u1 = User.query.get_or_404(uid1); u2 = User.query.get_or_404(uid2)
+@app.route('/mutual-friends/<int:uid1>/<username>', methods=['GET'])
+def mutual_friends(uid1, username):
+    u1 = User.query.get_or_404(uid1)
+    u2 = User.query.filter_by(username=username).first_or_404()
     f1 = set(f['id'] for f in get_friends_list(u1))
     f2 = set(f['id'] for f in get_friends_list(u2))
     mutual_ids = f1 & f2
@@ -304,7 +279,15 @@ def get_chats(uid):
     member_chats = ChatMember.query.filter_by(user_id=uid).all()
     chat_ids = [m.chat_id for m in member_chats]
     chats = Chat.query.filter(Chat.id.in_(chat_ids)).order_by(Chat.created_at.desc()).all()
-    return jsonify([chat_dict(c, uid) for c in chats])
+    result = []
+    for c in chats:
+        members = [user_dict(User.query.get(m.user_id)) for m in ChatMember.query.filter_by(chat_id=c.id).all()]
+        result.append({
+            'id': c.id, 'name': c.name, 'description': c.description,
+            'avatar_url': c.avatar_url, 'is_group': c.is_group,
+            'created_by': c.created_by, 'members': members
+        })
+    return jsonify(result)
 
 @app.route('/chat', methods=['POST'])
 def create_chat():
@@ -318,70 +301,34 @@ def create_chat():
     cm = ChatMember(chat_id=chat.id, user_id=creator.id, can_invite=True)
     db.session.add(cm)
     if not is_group:
-        other = User.query.get(data.get('other_user_id'))
-        if other:
-            cm2 = ChatMember(chat_id=chat.id, user_id=other.id)
+        other_id = data.get('other_user_id')
+        if other_id:
+            cm2 = ChatMember(chat_id=chat.id, user_id=other_id)
             db.session.add(cm2)
     db.session.commit()
-    return jsonify(chat_dict(chat, creator.id))
-
-@app.route('/chat/<int:cid>/invite', methods=['POST'])
-def invite_to_chat(cid):
-    data = request.get_json()
-    chat = Chat.query.get_or_404(cid)
-    if not chat.is_group: return jsonify({'error': 'Не групповой чат'}), 400
-    new_user = User.query.filter_by(username=data['username']).first()
-    if not new_user: return jsonify({'error': 'Пользователь не найден'}), 404
-    if ChatMember.query.filter_by(chat_id=cid, user_id=new_user.id).first():
-        return jsonify({'error': 'Уже в чате'}), 400
-    cm = ChatMember(chat_id=cid, user_id=new_user.id)
-    db.session.add(cm); db.session.commit()
-    return jsonify({'message': f'{new_user.username} добавлен'})
-
-@app.route('/chat/<int:cid>/settings', methods=['POST'])
-def update_chat_settings(cid):
-    data = request.get_json()
-    chat = Chat.query.get_or_404(cid)
-    if 'name' in data: chat.name = data['name']
-    if 'description' in data: chat.description = data['description']
-    if 'avatar_url' in data: chat.avatar_url = data['avatar_url']
-    db.session.commit()
-    return jsonify({'message': 'Настройки обновлены'})
+    return jsonify({'id': chat.id, 'name': chat.name, 'is_group': chat.is_group})
 
 @app.route('/chat/<int:cid>/messages', methods=['GET'])
 def get_messages(cid):
     msgs = Message.query.filter_by(chat_id=cid).order_by(Message.timestamp.asc()).limit(100).all()
-    return jsonify([msg_dict(m) for m in msgs])
+    return jsonify([{
+        'id': m.id, 'chat_id': m.chat_id, 'sender_id': m.sender_id,
+        'content': m.content, 'timestamp': m.timestamp.isoformat(),
+        'delivered': m.delivered, 'read': m.read,
+        'sender': user_dict(User.query.get(m.sender_id))
+    } for m in msgs])
 
 @app.route('/chat/<int:cid>/message', methods=['POST'])
 def send_message(cid):
     data = request.get_json()
     msg = Message(chat_id=cid, sender_id=data['sender_id'], content=data['content'])
     db.session.add(msg); db.session.commit()
-    # Отмечаем доставку для всех онлайн-участников
-    members = ChatMember.query.filter_by(chat_id=cid).all()
-    for m in members:
-        if m.user_id != data['sender_id'] and m.user.online:
-            msg.delivered = True
-    db.session.commit()
-    return jsonify(msg_dict(msg))
-
-@app.route('/message/<int:mid>/read', methods=['POST'])
-def mark_read(mid):
-    msg = Message.query.get_or_404(mid)
-    msg.read = True; db.session.commit()
-    return jsonify({'ok': True})
-
-@app.route('/chat/<int:cid>/upload-avatar', methods=['POST'])
-def upload_chat_avatar(cid):
-    chat = Chat.query.get_or_404(cid)
-    file = request.files['avatar']
-    ext = file.filename.rsplit('.', 1)[-1].lower()
-    if ext not in ('jpg','jpeg','png','gif','webp'): return jsonify({'error': 'Формат не поддерживается'}), 400
-    fn = f"chat_{uuid.uuid4()}.{ext}"
-    file.save(os.path.join(app.config['UPLOAD_FOLDER'], fn))
-    chat.avatar_url = f"/static/avatars/{fn}"; db.session.commit()
-    return jsonify({'avatar_url': chat.avatar_url})
+    return jsonify({
+        'id': msg.id, 'chat_id': msg.chat_id, 'sender_id': msg.sender_id,
+        'content': msg.content, 'timestamp': msg.timestamp.isoformat(),
+        'delivered': msg.delivered, 'read': msg.read,
+        'sender': user_dict(User.query.get(msg.sender_id))
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
