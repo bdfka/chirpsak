@@ -77,7 +77,7 @@ with app.app_context():
 def u_dict(u):
     return {'id':u.id,'username':u.username,'verified':u.verified,'badge_type':u.badge_type,'bio':u.bio,'avatar_url':u.avatar_url,'online':u.online,'last_seen':u.last_seen.isoformat()}
 
-# ВСЕ API РОУТЫ БЕЗ /api/
+# API
 @app.route('/register', methods=['POST'])
 def register():
     d=request.get_json()
@@ -165,7 +165,7 @@ def ch_pass():
 def upload_avatar():
     f=request.files['avatar'];u=User.query.get(request.form['user_id'])
     ext=f.filename.rsplit('.',1)[-1].lower()
-    if ext not in('jpg','jpeg','png','gif','webp'):return jsonify({'error':'Формат не OK'}),400
+    if ext not in('jpg','jpeg','png','gif','webp'):return jsonify({'error':'Формат'}),400
     fn=f"{uuid.uuid4()}.{ext}"
     f.save(os.path.join(app.config['UPLOAD_FOLDER'],fn))
     u.avatar_url=f"/static/avatars/{fn}";db.session.commit()
@@ -188,7 +188,6 @@ def send_fr():
     to=User.query.filter_by(username=d['to_username']).first()
     if not to:return jsonify({'error':'Не найден'}),404
     if d['from_id']==to.id:return jsonify({'error':'Нельзя'}),400
-    if FriendRequest.query.filter_by(from_id=d['from_id'],to_id=to.id,status='pending').first():return jsonify({'error':'Уже'}),400
     db.session.add(FriendRequest(from_id=d['from_id'],to_id=to.id));db.session.commit()
     return jsonify({'message':'OK'})
 
@@ -231,7 +230,7 @@ def create_chat():
     db.session.add(ChatMember(chat_id=c.id,user_id=d['creator_id']))
     if not d.get('is_group') and d.get('other_user_id'):db.session.add(ChatMember(chat_id=c.id,user_id=d['other_user_id']))
     db.session.commit()
-    return jsonify({'id':c.id,'name':c.name})
+    return jsonify({'id':c.id})
 
 @app.route('/chat/<int:cid>/messages', methods=['GET'])
 def msgs(cid):
@@ -245,7 +244,7 @@ def send_msg(cid):
     db.session.add(m);db.session.commit()
     return jsonify({'id':m.id,'sender':u_dict(User.query.get(m.sender_id)),'content':m.content,'timestamp':m.timestamp.isoformat()})
 
-# ОТДАЧА index.html (должен быть в той же папке)
+# САЙТ
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
