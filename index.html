@@ -548,4 +548,139 @@
                         <div class="card">
                             <div class="post-header">
                                 <div class="post-author" onclick="showProfile('${p.author.username}')">
-                                    <div class="post-avatar">${p.author.avatar_url?`<img src="${p.author.avatar_url}"
+                                    <div class="post-avatar">${p.author.avatar_url?`<img src="${p.author.avatar_url}" alt="">`:p.author.username[0]}</div>
+                                    <span>${p.author.username}</span>
+                                    ${badgeHtml(p.author.verified,p.author.badge_type)}
+                                </div>
+                                <span class="post-time">${new Date(p.timestamp).toLocaleString('ru-RU')}</span>
+                            </div>
+                            <div class="post-content">${parseContent(p.content)}</div>
+                            <div class="post-actions">
+                                <button class="action-btn" onclick="likePost(${p.id},this)">❤️ <span class="lc">${p.likes}</span></button>
+                            </div>
+                        </div>
+                    `).join('');
+                }else{html='<div class="card" style="text-align:center">Нет постов 🐤</div>'}
+                content.innerHTML=html;
+            }else if(page==='profile'){
+                const data=await api('GET',`/user/${param}`);
+                if(!data)return showPage('feed');
+                profileUser=param;
+                const u=data.user;
+                const posts=data.posts||[];
+                const isSub=subs.includes(param);
+                let html=`
+                    <div style="text-align:center;padding:20px 0">
+                        <div class="profile-avatar-large">${u.avatar_url?`<img src="${u.avatar_url}" alt="">`:u.username[0]}</div>
+                        <h2>${u.username} ${badgeHtml(u.verified,u.badge_type)}</h2>
+                        <p style="color:var(--text-dim)">${u.bio||''}</p>
+                        ${uid&&param!==uname?`
+                            <button class="subscribe-btn ${isSub?'unfollow':'follow'}" onclick="toggleSub('${param}')">
+                                ${isSub?'Отписаться':'Подписаться'}
+                            </button>
+                        `:''}
+                    </div>
+                `;
+                if(posts.length>0){
+                    html+=posts.map(p=>`
+                        <div class="card">
+                            <div class="post-header"><span class="post-time">${new Date(p.timestamp).toLocaleString('ru-RU')}</span></div>
+                            <div class="post-content">${parseContent(p.content)}</div>
+                            <div class="post-actions"><span style="color:var(--text-dim)">❤️ ${p.likes}</span></div>
+                        </div>
+                    `).join('');
+                }else{html+='<div class="card" style="text-align:center">Нет постов</div>'}
+                content.innerHTML=html;
+            }else if(page==='hashtags'){
+                const posts=await api('GET','/posts');
+                const ht={};
+                if(posts) posts.forEach(p=>{
+                    const tags=p.content.match(/#(\w+)/g);
+                    if(tags) tags.forEach(t=>{const w=t.slice(1).toLowerCase();ht[w]=(ht[w]||0)+1});
+                });
+                const sorted=Object.entries(ht).sort((a,b)=>b[1]-a[1]).slice(0,100);
+                let html='<h2 style="color:var(--primary-glow);margin-bottom:14px">🔥 Топ хештегов</h2><div class="hashtag-list">';
+                if(sorted.length>0) sorted.forEach(([tag,count])=>html+=`<span class="hashtag-item" onclick="showHashtag('${tag}')">#${tag} (${count})</span>`);
+                else html+='<p style="color:var(--text-dim)">Нет хештегов</p>';
+                html+='</div>';
+                content.innerHTML=html;
+            }else if(page==='hashtag'){
+                const posts=await api('GET','/posts');
+                const filtered=posts?posts.filter(p=>{
+                    const tags=p.content.match(/#(\w+)/g);
+                    return tags&&tags.some(t=>t.slice(1).toLowerCase()===param.toLowerCase());
+                }):[];
+                let html=`<h2 style="color:var(--hashtag);margin-bottom:14px">#${param}</h2>`;
+                if(filtered.length>0){
+                    html+=filtered.map(p=>`
+                        <div class="card">
+                            <div class="post-header">
+                                <div class="post-author" onclick="showProfile('${p.author.username}')">
+                                    <div class="post-avatar">${p.author.avatar_url?`<img src="${p.author.avatar_url}" alt="">`:p.author.username[0]}</div>
+                                    <span>${p.author.username}</span>
+                                    ${badgeHtml(p.author.verified,p.author.badge_type)}
+                                </div>
+                                <span class="post-time">${new Date(p.timestamp).toLocaleString('ru-RU')}</span>
+                            </div>
+                            <div class="post-content">${parseContent(p.content)}</div>
+                            <div class="post-actions">❤️ ${p.likes}</div>
+                        </div>
+                    `).join('');
+                }else{html+='<div class="card" style="text-align:center">Нет постов</div>'}
+                html+=`<button class="btn btn-outline" onclick="showPage('hashtags')" style="margin-top:10px">← Назад</button>`;
+                content.innerHTML=html;
+            }
+        }
+
+        function showProfile(u){showPage('profile',u)}
+        function showHashtag(t){showPage('hashtag',t)}
+
+        async function publishPost(){
+            const content=document.getElementById('newPostContent').value.trim();
+            if(!content){toast('Напишите текст!','error');return}
+            if(!uid){toast('Войдите!','error');return}
+            const r=await api('POST','/post',{content,user_id:parseInt(uid)});
+            if(r){
+                toast('Опубликовано!');
+                closeModal('postModal');
+                document.getElementById('newPostContent').value='';
+                document.getElementById('charCount').textContent='0';
+                showPage('feed');
+            }
+        }
+
+        async function likePost(pid,btn){
+            if(!uid){toast('Войдите!','error');return}
+            const r=await api('POST',`/like/${pid}`);
+            if(r){
+                btn.querySelector('.lc').textContent=r.likes;
+                btn.classList.add('liked');
+                setTimeout(()=>btn.classList.remove('liked'),600);
+            }
+        }
+
+        document.getElementById('newPostContent').addEventListener('input',function(){
+            document.getElementById('charCount').textContent=this.value.length;
+        });
+
+        document.addEventListener('click',e=>{
+            if(e.target.classList.contains('modal-overlay'))e.target.classList.remove('active');
+            const ac=document.getElementById('adminConsole'),ab=document.querySelector('.admin-btn');
+            if(!ac.contains(e.target)&&e.target!==ab&&ac.classList.contains('active'))ac.classList.remove('active');
+        });
+
+        document.addEventListener('keypress',e=>{
+            if(e.key==='Enter'){
+                if(document.getElementById('loginModal').classList.contains('active'))login();
+                if(document.getElementById('registerModal').classList.contains('active'))register();
+                if(document.getElementById('adminConsole').classList.contains('active'))execAdmin();
+                if(document.getElementById('postModal').classList.contains('active'))publishPost();
+            }
+        });
+
+        createParticles();
+        updateNav();
+        showPage('feed');
+    </script>
+</body>
+</html>
