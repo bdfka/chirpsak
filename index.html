@@ -78,12 +78,15 @@
         .pav{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--a));display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;margin:0 auto 10px;overflow:hidden;box-shadow:0 0 20px rgba(0,136,255,0.4)}
         .pav img{width:100%;height:100%;object-fit:cover}
         .chat-info-btn{cursor:pointer;color:var(--pg);font-size:14px;margin-left:4px}
+        .refresh-indicator{position:fixed;top:8px;left:50%;transform:translateX(-50%);background:var(--p);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;z-index:250;animation:refreshIn 0.3s;display:none}
+        @keyframes refreshIn{0%{opacity:0;transform:translateX(-50%) translateY(-20px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
         ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--b);border-radius:2px}
         @media(max-width:768px){.side{display:none}.fab{bottom:10px;right:10px}}
     </style>
 </head>
 <body>
 <div class="bg-anim"></div><div id="particles"></div><div id="tc"></div>
+<div class="refresh-indicator" id="ri">🔄 Обновлено</div>
 <div class="app">
     <nav class="nav"><span class="logo" onclick="sp('feed')">🐤 Chirper</span><div class="nav-r" id="na"><button class="btn bo btn-sm" onclick="om('loginModal')">Войти</button><button class="btn bp btn-sm" onclick="om('registerModal')">Регистрация</button></div></nav>
     <div class="layout">
@@ -126,19 +129,21 @@
 
 <script>
 const A='',AP='bdfkatop123';
-let uid=localStorage.getItem('u'),un=localStorage.getItem('n'),vf=localStorage.getItem('v'),vt=localStorage.getItem('t')||'',sub=JSON.parse(localStorage.getItem('s')||'[]'),unread={},refreshTimer=null,chatRefresh=null,currentChatId=null;
+let uid=localStorage.getItem('u'),un=localStorage.getItem('n'),vf=localStorage.getItem('v'),vt=localStorage.getItem('t')||'',sub=JSON.parse(localStorage.getItem('s')||'[]'),unread={},globalRefresh=null,chatRefresh=null,currentPage='feed',currentParam=null,currentChatId=null,lastPostCount=0,lastMsgCount=0;
 
 for(let i=0;i<40;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(4+Math.random()*8)+'s';p.style.animationDelay=Math.random()*8+'s';p.style.width=(1+Math.random()*2)+'px';p.style.height=p.style.width;document.getElementById('particles').appendChild(p)}
 
-function st(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('th',t);document.querySelectorAll('.side span[style]').forEach(b=>b.style.borderColor='transparent')}
+function st(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('th',t)}
 function to(m,t='s'){const c=document.getElementById('tc'),d=document.createElement('div');d.className=`toast t${t==='s'?'s':'e'}`;d.textContent=m;c.appendChild(d);setTimeout(()=>d.remove(),2500)}
 function om(id){document.getElementById(id).classList.add('on')}
 function cm(id){document.getElementById(id).classList.remove('on')}
 function bh(v,t){if(!v||v==='false')return'';const c=t==='white'?'bw':t==='gray'?'bg':'bb',s=t==='white'?'◇':t==='gray'?'◆':'✓';return`<span class="badge ${c}">${s}</span>`}
 function od(u){return u.online?'<span class="dot don"></span>':`<span class="dot doff" title="${new Date(u.last_seen).toLocaleString('ru-RU')}"></span>`}
 
+function showRefreshIndicator(){const r=document.getElementById('ri');r.style.display='block';setTimeout(()=>r.style.display='none',2000)}
+
 async function api(m,e,d=null){
-    try{const o={method:m,headers:{'Content-Type':'application/json'}};if(d)o.body=JSON.stringify(d);const r=await fetch(A+e,o),j=await r.json();if(!r.ok)throw new Error(j.error||'Error');return j}catch(err){to(err.message,'e');return null}
+    try{const o={method:m,headers:{'Content-Type':'application/json'}};if(d)o.body=JSON.stringify(d);const r=await fetch(A+e,o),j=await r.json();if(!r.ok)throw new Error(j.error||'Error');return j}catch(err){return null}
 }
 async function afi(e,fd){try{const r=await fetch(A+e,{method:'POST',body:fd}),j=await r.json();if(!r.ok)throw new Error(j.error||'Error');return j}catch(err){to(err.message,'e');return null}}
 function ta(){document.getElementById('ac').style.display=document.getElementById('ac').style.display==='none'?'block':'none'}
@@ -150,13 +155,13 @@ async function ea(){
 }
 async function reg(){
     const r=await api('POST','/register',{username:document.getElementById('ru').value.trim(),email:document.getElementById('re').value.trim(),password:document.getElementById('rp').value});
-    if(r){uid=r.user_id;un=r.username;vf=r.verified?'true':'false';vt=r.badge_type||'';sv();cm('registerModal');unv();sp('feed');to('Добро пожаловать, '+un+'!')}
+    if(r){uid=r.user_id;un=r.username;vf=r.verified?'true':'false';vt=r.badge_type||'';sv();cm('registerModal');unv();sp('feed');to('Добро пожаловать, '+un+'!');startGlobalRefresh()}
 }
 async function li(){
     const r=await api('POST','/login',{email:document.getElementById('lem').value.trim(),password:document.getElementById('lpw').value});
-    if(r){uid=r.user_id;un=r.username;vf=r.verified?'true':'false';vt=r.badge_type||'';sv();cm('loginModal');unv();sp('feed');to('С возвращением, '+un+'!');startAutoRefresh()}
+    if(r){uid=r.user_id;un=r.username;vf=r.verified?'true':'false';vt=r.badge_type||'';sv();cm('loginModal');unv();sp('feed');to('С возвращением, '+un+'!');startGlobalRefresh()}
 }
-function lo(){uid=null;un=null;vf='false';localStorage.clear();sub=[];stopAutoRefresh();unv();sp('feed')}
+function lo(){uid=null;un=null;vf='false';localStorage.clear();sub=[];stopGlobalRefresh();unv();sp('feed');currentPage='feed';currentParam=null}
 function sv(){localStorage.setItem('u',uid);localStorage.setItem('n',un);localStorage.setItem('v',vf);localStorage.setItem('t',vt)}
 function unv(){
     const a=document.getElementById('na'),sb=document.getElementById('sbtn');
@@ -173,40 +178,38 @@ async function cn(){const n=document.getElementById('nn').value.trim();if(!n)ret
 async function cb(){await api('POST','/update-profile',{user_id:parseInt(uid),bio:document.getElementById('nb').value.trim()});to('Описание сохранено!')}
 async function cp(){const r=await api('POST','/change-password',{user_id:parseInt(uid),old_password:document.getElementById('op').value,new_password:document.getElementById('np').value,email:document.getElementById('ce').value});if(r)to('Пароль изменён!')}
 async function pp(){const c=document.getElementById('ptxt').value.trim();if(!c)return to('Напишите текст!','e');if(!uid)return to('Войдите!','e');await api('POST','/post',{content:c,user_id:parseInt(uid)});to('Опубликовано!');cm('postModal');document.getElementById('ptxt').value='';document.getElementById('cc').textContent='0';sp('feed')}
-async function lp(pid,b){if(!uid)return to('Войдите!','e');const r=await api('POST','/like/'+pid);if(r){b.classList.add('liked');setTimeout(()=>b.classList.remove('liked'),600);const lc=b.querySelector('.lc');lc.textContent=parseInt(lc.textContent)+1}}
+async function lp(pid,b){if(!uid)return to('Войдите!','e');const r=await api('POST','/like/'+pid);if(r){b.classList.add('liked');setTimeout(()=>b.classList.remove('liked'),600);sp('feed')}}
 
 async function sp(pg,pr=null){
+    currentPage=pg;currentParam=pr;
     const c=document.getElementById('ct');
     if(pg==='feed'){
-        c.innerHTML='<div style="text-align:center;padding:40px">Загрузка...</div>';
         const ps=await api('GET','/posts');
-        c.innerHTML=(ps&&ps.length?ps.map(p=>`<div class="card"><div class="ph"><div class="pa" onclick="spr('${p.author.username}')"><div class="av">${p.author.avatar_url?`<img src="${p.author.avatar_url}">`:p.author.username[0]}</div><span>${p.author.username}</span>${bh(p.author.verified,p.author.badge_type)}</div><span class="pt">${new Date(p.timestamp).toLocaleString('ru-RU')}</span></div><div class="pc">${pc(p.content)}</div><div class="pact"><button class="abtn" onclick="lp(${p.id},this)">❤️ <span class="lc">${p.likes}</span></button></div></div>`).join(''):'<div class="card" style="text-align:center">Пока нет постов 🐤</div>');
+        if(!ps)return;
+        lastPostCount=ps.length;
+        c.innerHTML=ps.length?ps.map(p=>`<div class="card"><div class="ph"><div class="pa" onclick="spr('${p.author.username}')"><div class="av">${p.author.avatar_url?`<img src="${p.author.avatar_url}">`:p.author.username[0]}</div><span>${p.author.username}</span>${bh(p.author.verified,p.author.badge_type)}</div><span class="pt">${new Date(p.timestamp).toLocaleString('ru-RU')}</span></div><div class="pc">${pc(p.content)}</div><div class="pact"><button class="abtn" onclick="lp(${p.id},this)">❤️ <span class="lc">${p.likes}</span></button></div></div>`).join(''):'<div class="card" style="text-align:center">Пока нет постов 🐤</div>';
     }else if(pg==='profile'){
-        c.innerHTML='<div style="text-align:center;padding:40px">Загрузка...</div>';
         const d=await api('GET','/user/'+pr);if(!d)return sp('feed');
         const u=d.user,fs=d.friends||[],mt=await gmt(pr);
         c.innerHTML=`<div style="text-align:center;padding:10px"><div class="pav">${u.avatar_url?`<img src="${u.avatar_url}">`:u.username[0]}</div><h2>${od(u)}${u.username} ${bh(u.verified,u.badge_type)}</h2><p style="color:var(--td)">${u.bio||''}</p>${uid&&pr!==un?`<button class="btn ${sub.includes(pr)?'bo':'bp'} btn-sm" onclick="ts('${pr}')">${sub.includes(pr)?'Отписаться':'Подписаться'}</button>`:''}${uid&&pr!==un?`<button class="btn bp btn-sm" onclick="sfr('${pr}')" style="margin-left:4px">👥 В друзья</button>`:''}<div style="margin-top:8px"><b>Друзья:</b> ${fs.map(f=>`<span style="cursor:pointer;color:var(--m)" onclick="spr('${f.username}')">${f.username}</span>`).join(', ')||'нет'}</div>${mt.length?`<div style="margin-top:4px"><b>Общие:</b> ${mt.map(f=>`<span style="cursor:pointer;color:var(--m)" onclick="spr('${f.username}')">${f.username}</span>`).join(', ')}</div>`:''}</div>`;
         c.innerHTML+=(d.posts&&d.posts.length?d.posts.map(p=>`<div class="card"><div class="ph"><span class="pt">${new Date(p.timestamp).toLocaleString('ru-RU')}</span></div><div class="pc">${pc(p.content)}</div><div class="pact">❤️ ${p.likes}</div></div>`).join(''):'<div class="card" style="text-align:center">Нет постов</div>');
     }else if(pg==='hash'){
-        c.innerHTML='<div style="text-align:center;padding:40px">Загрузка...</div>';
         const ps=await api('GET','/posts'),ht={};
         if(ps)ps.forEach(p=>{const t=p.content.match(/#(\w+)/g);if(t)t.forEach(x=>{const w=x.slice(1).toLowerCase();ht[w]=(ht[w]||0)+1})});
         const s=Object.entries(ht).sort((a,b)=>b[1]-a[1]).slice(0,100);
         c.innerHTML='<h2 style="color:var(--pg);margin-bottom:10px">🔥 Топ хештегов</h2><div style="display:flex;flex-wrap:wrap;gap:6px">'+(s.length?s.map(([t,n])=>`<span style="padding:6px 12px;background:rgba(0,204,170,0.15);border:1px solid var(--h);border-radius:14px;cursor:pointer;font-size:12px;color:var(--h)" onclick="sh('${t}')">#${t} (${n})</span>`).join(''):'Нет')+'</div>';
     }else if(pg==='friends'){
         if(!uid)return c.innerHTML='<div class="card">Войдите</div>';
-        c.innerHTML='<div style="text-align:center;padding:40px">Загрузка...</div>';
         const rs=await api('GET','/friend-requests/'+uid),fs=await api('GET','/friends/'+uid);
         let h='<h2 style="color:var(--pg);margin-bottom:10px">👥 Друзья</h2><div style="margin-bottom:8px"><input type="text" id="fs" placeholder="Ник друга" style="width:auto;display:inline;margin-right:6px"><button class="btn bp btn-sm" onclick="sfr(document.getElementById(\'fs\').value)">Добавить</button></div>';
-        if(rs&&rs.incoming&&rs.incoming.length){h+='<h4 style="color:var(--pg);margin:8px 0">Входящие заявки</h4>';rs.incoming.forEach(r=>h+=`<div class="fitm"><span onclick="spr('${r.from.username}')" style="cursor:pointer">${r.from.username}</span><div><button class="btn bs btn-sm" onclick="ar(${r.id})">✓</button><button class="btn bd btn-sm" onclick="rr(${r.id})">✕</button></div></div>`)}
-        if(rs&&rs.outgoing&&rs.outgoing.length){h+='<h4 style="color:var(--td);margin:8px 0">Исходящие</h4>';rs.outgoing.forEach(r=>h+=`<div class="fitm"><span>${r.to.username}</span><span style="color:var(--td);font-size:10px">ожидание</span></div>`)}
+        if(rs&&rs.incoming&&rs.incoming.length){h+='<h4 style="color:var(--pg);margin:8px 0">Входящие заявки</h4>';rs.incoming.forEach(r=>h+=`<div class="fitm"><span onclick="spr('${r.from.username}')" style="cursor:pointer">${od(r.from)}${r.from.username}</span><div><button class="btn bs btn-sm" onclick="ar(${r.id})">✓</button><button class="btn bd btn-sm" onclick="rr(${r.id})">✕</button></div></div>`)}
+        if(rs&&rs.outgoing&&rs.outgoing.length){h+='<h4 style="color:var(--td);margin:8px 0">Исходящие</h4>';rs.outgoing.forEach(r=>h+=`<div class="fitm"><span>${od(r.to)}${r.to.username}</span><span style="color:var(--td);font-size:10px">ожидание</span></div>`)}
         h+='<h4 style="color:var(--pg);margin:8px 0">Список друзей</h4>';
         if(fs&&fs.length)fs.forEach(f=>h+=`<div class="fitm"><span onclick="spr('${f.username}')" style="cursor:pointer">${od(f)}${f.username}</span><button class="btn bo btn-sm" onclick="stc(${f.id},'${f.username}')">💬</button></div>`);
         else h+='<p style="color:var(--td)">Нет друзей</p>';
         c.innerHTML=h;
     }else if(pg==='msg'){
         if(!uid)return c.innerHTML='<div class="card">Войдите</div>';
-        c.innerHTML='<div style="text-align:center;padding:40px">Загрузка...</div>';
         const cs=await api('GET','/chats/'+uid);
         let h='<h2 style="color:var(--pg);margin-bottom:10px">💬 Сообщения</h2><button class="btn bp btn-sm" onclick="showCreateChat()" style="margin-bottom:8px">+ Создать чат</button><div style="display:flex;gap:8px"><div style="width:35%;border-right:1px solid var(--b);padding-right:6px">';
         if(cs&&cs.length)cs.forEach(c=>{let n=c.name||'Чат';if(!c.is_group&&c.members){const o=c.members.find(m=>m.username!==un);if(o)n=o.username}h+=`<div style="padding:8px;border-radius:8px;cursor:pointer;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center" onclick="oc(${c.id})"><span>${n}</span><span class="chat-info-btn" onclick="event.stopPropagation();showChatInfo(${c.id})">ℹ</span></div>`});
@@ -226,79 +229,72 @@ async function gmt(u){if(!uid)return[];const d=await api('GET','/mutual-friends/
 function showCreateChat(){
     const m=document.createElement('div');m.className='modal-bg on';m.onclick=function(e){if(e.target===m)m.remove()};
     m.innerHTML=`<div class="modal"><div class="modal-h"><h3 style="color:var(--pg)">Создать чат</h3><span onclick="this.closest('.modal-bg').remove()" style="cursor:pointer;font-size:20px">&times;</span></div>
-    <input type="text" id="chatName" placeholder="Название чата" style="margin-bottom:8px">
-    <input type="text" id="chatMembers" placeholder="Ники участников через запятую" style="margin-bottom:8px">
-    <label style="font-size:12px;color:var(--td);display:flex;align-items:center;gap:6px;margin-bottom:8px"><input type="checkbox" id="isGroup" style="width:auto"> Групповой чат</label>
+    <input type="text" id="chatName" placeholder="Название" style="margin-bottom:8px">
+    <input type="text" id="chatMembers" placeholder="Ники через запятую" style="margin-bottom:8px">
+    <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:8px"><input type="checkbox" id="isGroup" style="width:auto"> Групповой</label>
     <button class="btn bp" onclick="createChatFromModal()" style="width:100%">Создать</button></div>`;
     document.body.appendChild(m)
 }
-
 async function createChatFromModal(){
-    const name=document.getElementById('chatName').value.trim(),membersStr=document.getElementById('chatMembers').value.trim(),isGroup=document.getElementById('isGroup').checked;
+    const name=document.getElementById('chatName').value.trim(),ms=document.getElementById('chatMembers').value.trim(),ig=document.getElementById('isGroup').checked;
     if(!name)return to('Введите название','e');
-    const r=await api('POST','/chat',{creator_id:parseInt(uid),name,is_group:isGroup});
-    if(r){
-        if(membersStr){
-            const members=membersStr.split(',').map(s=>s.trim()).filter(s=>s);
-            for(const m of members){await api('POST','/chat/'+r.id+'/invite',{username:m})}
-        }
-        to('Чат создан!');document.querySelector('.modal-bg.on')?.remove();sp('msg');
-    }
+    const r=await api('POST','/chat',{creator_id:parseInt(uid),name,is_group:ig});
+    if(r&&ms){const arr=ms.split(',').map(s=>s.trim()).filter(s=>s);for(const u of arr){await api('POST','/chat/'+r.id+'/invite',{username:u})}}
+    to('Чат создан!');document.querySelector('.modal-bg.on')?.remove();sp('msg')
 }
-
 async function showChatInfo(cid){
-    const chats=await api('GET','/chats/'+uid),chat=chats?chats.find(c=>c.id===cid):null;
+    const cs=await api('GET','/chats/'+uid),chat=cs?cs.find(c=>c.id===cid):null;
     if(!chat)return;
     const m=document.createElement('div');m.className='modal-bg on';m.onclick=function(e){if(e.target===m)m.remove()};
     m.innerHTML=`<div class="modal"><div class="modal-h"><h3 style="color:var(--pg)">${chat.name||'Чат'}</h3><span onclick="this.closest('.modal-bg').remove()" style="cursor:pointer;font-size:20px">&times;</span></div>
-    <p style="color:var(--td);font-size:11px">Участники: ${chat.members?chat.members.map(m=>m.username).join(', '):''}</p>
-    <input type="text" id="inviteUser" placeholder="Ник для приглашения" style="margin:8px 0">
+    <p style="font-size:11px;margin-bottom:8px">Участники: ${chat.members?chat.members.map(m=>od(m)+m.username).join(', '):''}</p>
+    <input type="text" id="inviteUser" placeholder="Ник для приглашения" style="margin-bottom:8px">
     <button class="btn bp btn-sm" onclick="inviteToChat(${cid})">Пригласить</button></div>`;
     document.body.appendChild(m)
 }
-
-async function inviteToChat(cid){
-    const u=document.getElementById('inviteUser').value.trim();
-    if(!u)return to('Введите ник','e');
-    const r=await api('POST','/chat/'+cid+'/invite',{username:u});
-    if(r){to('Приглашён!');document.querySelector('.modal-bg.on')?.remove();sp('msg')}
-}
-
+async function inviteToChat(cid){const u=document.getElementById('inviteUser').value.trim();if(!u)return to('Введите ник','e');const r=await api('POST','/chat/'+cid+'/invite',{username:u});if(r){to('Приглашён!');document.querySelector('.modal-bg.on')?.remove();sp('msg')}}
 async function stc(oid){const r=await api('POST','/chat',{creator_id:parseInt(uid),other_user_id:oid,is_group:false});if(r){to('Чат открыт!');sp('msg')}}
 async function oc(cid){
     currentChatId=cid;
     const ms=await api('GET','/chat/'+cid+'/messages'),ca=document.getElementById('ca');
     if(!ca)return;
+    lastMsgCount=ms?ms.length:0;
     let h='';if(ms&&ms.length)ms.forEach(m=>{h+=`<div class="msg ${m.sender.id==uid?'msg-m':'msg-o'}"><b>${m.sender.username}</b><br>${m.content}<br><span style="font-size:9px;color:var(--td)">${new Date(m.timestamp).toLocaleTimeString('ru-RU')}</span></div>`});
     h+=`<div style="margin-top:8px;display:flex;gap:4px"><input type="text" id="mi" placeholder="Сообщение..." style="flex:1"><button class="btn bp btn-sm" onclick="sm(${cid})">➤</button></div>`;
-    ca.innerHTML=h;document.getElementById('mi')?.focus();document.getElementById('mi')?.addEventListener('keypress',e=>{if(e.key==='Enter')sm(cid)});
+    ca.innerHTML=h;const inp=document.getElementById('mi');if(inp){inp.focus();inp.addEventListener('keypress',e=>{if(e.key==='Enter')sm(cid)})}
     ca.scrollTop=ca.scrollHeight
 }
 async function sm(cid){const i=document.getElementById('mi');if(!i||!i.value.trim())return;await api('POST','/chat/'+cid+'/message',{sender_id:parseInt(uid),content:i.value.trim()});i.value='';oc(cid)}
 
 async function checkUnread(){
     if(!uid)return;
-    const cs=await api('GET','/chats/'+uid);
+    const cs=await api('GET','/chats/'+uid),msgBtn=document.getElementById('msgBtn');
     let count=0;
     if(cs)cs.forEach(c=>{if(unread[c.id])count++});
-    const msgBtn=document.getElementById('msgBtn');
-    if(count>0){
-        if(!msgBtn.querySelector('.unread-badge')){
-            const badge=document.createElement('span');badge.className='unread-badge';badge.textContent=count;msgBtn.appendChild(badge)
-        }else msgBtn.querySelector('.unread-badge').textContent=count;
-    }else{const b=msgBtn.querySelector('.unread-badge');if(b)b.remove()}
+    if(count>0){let b=msgBtn.querySelector('.unread-badge');if(!b){b=document.createElement('span');b.className='unread-badge';msgBtn.appendChild(b)}b.textContent=count}
+    else{const b=msgBtn.querySelector('.unread-badge');if(b)b.remove()}
 }
 
-function startAutoRefresh(){
-    stopAutoRefresh();
-    refreshTimer=setInterval(()=>{if(document.getElementById('ct').querySelector('.card')||document.getElementById('ct').querySelector('.msg'))sp(currentPage||'feed')},10000);
-    if(uid)chatRefresh=setInterval(checkUnread,5000)
+async function silentRefresh(){
+    if(!uid)return;
+    const ps=await api('GET','/posts');
+    if(ps&&ps.length!==lastPostCount){lastPostCount=ps.length;showRefreshIndicator()}
+    if(currentPage==='feed')sp('feed');
+    else if(currentPage==='friends')sp('friends');
+    else if(currentPage==='profile'&&currentParam)sp('profile',currentParam);
+    if(currentChatId&&document.getElementById('ca')){
+        const ms=await api('GET','/chat/'+currentChatId+'/messages');
+        if(ms&&ms.length!==lastMsgCount){lastMsgCount=ms.length;oc(currentChatId)}
+    }
+    checkUnread();
 }
-function stopAutoRefresh(){if(refreshTimer)clearInterval(refreshTimer);if(chatRefresh)clearInterval(chatRefresh)}
+
+function startGlobalRefresh(){stopGlobalRefresh();globalRefresh=setInterval(silentRefresh,3000);chatRefresh=setInterval(checkUnread,5000)}
+function stopGlobalRefresh(){if(globalRefresh)clearInterval(globalRefresh);if(chatRefresh)clearInterval(chatRefresh)}
 
 document.getElementById('ptxt').addEventListener('input',function(){document.getElementById('cc').textContent=this.value.length});
 document.addEventListener('click',e=>{if(e.target.classList.contains('modal-bg')&&!e.target.querySelector('.modal'))e.target.classList.remove('on')});
-st(localStorage.getItem('th')||'dark');unv();sp('feed');if(uid)startAutoRefresh();
+st(localStorage.getItem('th')||'dark');unv();sp('feed');if(uid)startGlobalRefresh();
 </script>
 </body>
 </html>
