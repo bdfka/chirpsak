@@ -7,20 +7,19 @@
     <style>
         :root {
             --bg: #06060f;
-            --card-bg: rgba(15, 15, 40, 0.8);
+            --card-bg: rgba(15,15,40,0.85);
             --primary: #0088ff;
             --primary-glow: #00bbff;
             --accent: #0066dd;
             --text: #e0e8ff;
             --text-dim: #88aacc;
-            --border: rgba(0, 150, 255, 0.2);
+            --border: rgba(0,150,255,0.2);
             --success: #00ff88;
             --danger: #ff4477;
             --hashtag: #00ccaa;
             --mention: #ffaa00;
-            --white: #ffffff;
-            --gray: #888888;
-            --blue: #0088ff;
+            --online: #00ff88;
+            --offline: #666;
         }
         *{margin:0;padding:0;box-sizing:border-box}
         body{
@@ -32,28 +31,20 @@
         .bg-animation{
             position:fixed;top:0;left:0;width:100%;height:100%;
             pointer-events:none;z-index:0;
-            background:
-                radial-gradient(ellipse at 20% 50%,rgba(0,120,255,0.08) 0%,transparent 50%),
-                radial-gradient(ellipse at 80% 20%,rgba(0,180,255,0.06) 0%,transparent 50%),
-                radial-gradient(ellipse at 50% 80%,rgba(0,100,255,0.05) 0%,transparent 50%);
+            background:radial-gradient(ellipse at 20% 50%,rgba(0,120,255,0.08) 0%,transparent 50%),
+                       radial-gradient(ellipse at 80% 20%,rgba(0,180,255,0.06) 0%,transparent 50%),
+                       radial-gradient(ellipse at 50% 80%,rgba(0,100,255,0.05) 0%,transparent 50%);
         }
         .grid-overlay{
             position:fixed;top:0;left:0;width:100%;height:100%;
-            pointer-events:none;z-index:0;opacity:0.05;
-            background-image:
-                linear-gradient(rgba(0,150,255,0.3) 1px,transparent 1px),
-                linear-gradient(90deg,rgba(0,150,255,0.3) 1px,transparent 1px);
+            pointer-events:none;z-index:0;opacity:0.04;
+            background-image:linear-gradient(rgba(0,150,255,0.3) 1px,transparent 1px),
+                             linear-gradient(90deg,rgba(0,150,255,0.3) 1px,transparent 1px);
             background-size:50px 50px;
-            animation:gridMove 20s linear infinite;
-        }
-        @keyframes gridMove{
-            0%{transform:perspective(500px) rotateX(60deg) translateY(0)}
-            100%{transform:perspective(500px) rotateX(60deg) translateY(50px)}
         }
         .particle{
             position:fixed;pointer-events:none;z-index:0;
-            width:2px;height:2px;background:var(--primary);
-            border-radius:50%;
+            width:2px;height:2px;background:var(--primary);border-radius:50%;
             box-shadow:0 0 6px var(--primary-glow),0 0 12px var(--primary);
             animation:floatUp linear infinite;
         }
@@ -64,103 +55,99 @@
         }
         .app{position:relative;z-index:1;width:100%;height:100vh;display:flex;flex-direction:column}
         .navbar{
-            z-index:100;background:var(--card-bg);
-            backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-            border-bottom:1px solid var(--border);
-            padding:10px 20px;display:flex;justify-content:space-between;align-items:center;
-            box-shadow:0 5px 30px rgba(0,0,0,0.5);flex-shrink:0;
+            z-index:100;background:var(--card-bg);backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border);padding:8px 16px;
+            display:flex;justify-content:space-between;align-items:center;
+            box-shadow:0 5px 25px rgba(0,0,0,0.5);flex-shrink:0;
         }
         .logo{
-            font-size:22px;font-weight:800;
+            font-size:20px;font-weight:800;
             background:linear-gradient(135deg,var(--primary-glow),#fff,var(--primary));
             -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-            filter:drop-shadow(0 0 10px rgba(0,187,255,0.5));
-            cursor:pointer;text-decoration:none;
+            cursor:pointer;
         }
-        .nav-actions{display:flex;gap:8px;align-items:center}
+        .nav-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
         .verified-badge{
             display:inline-flex;align-items:center;justify-content:center;
-            width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:bold;
-            box-shadow:0 0 10px rgba(0,136,255,0.5);animation:verifiedPulse 2s ease-in-out infinite;
+            width:16px;height:16px;border-radius:50%;font-size:9px;font-weight:bold;
+            animation:verifiedPulse 2s ease-in-out infinite;
         }
-        .verified-white{background:linear-gradient(135deg,#ffffff,#cccccc);color:#000;box-shadow:0 0 12px rgba(255,255,255,0.6)}
-        .verified-gray{background:linear-gradient(135deg,#888888,#666666);color:#fff;box-shadow:0 0 12px rgba(136,136,136,0.6)}
-        .verified-blue{background:linear-gradient(135deg,#0088ff,#00ccff);color:#fff;box-shadow:0 0 12px rgba(0,136,255,0.6)}
-        @keyframes verifiedPulse{
-            0%,100%{transform:scale(1)}50%{transform:scale(1.15)}
+        .verified-white{background:linear-gradient(135deg,#fff,#ccc);color:#000}
+        .verified-gray{background:linear-gradient(135deg,#888,#666);color:#fff}
+        .verified-blue{background:linear-gradient(135deg,#0088ff,#00ccff);color:#fff}
+        @keyframes verifiedPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+        .status-dot{
+            display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;
         }
+        .status-online{background:var(--online);box-shadow:0 0 6px var(--online)}
+        .status-offline{background:var(--offline)}
         .btn{
-            padding:8px 14px;border-radius:10px;border:none;cursor:pointer;
+            padding:7px 12px;border-radius:8px;border:none;cursor:pointer;
             font-weight:600;font-size:12px;transition:all 0.3s ease;
-            display:inline-flex;align-items:center;gap:5px;color:#fff;
+            display:inline-flex;align-items:center;gap:4px;color:#fff;
         }
-        .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 3px 12px rgba(0,136,255,0.4)}
-        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(0,136,255,0.6)}
+        .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 3px 10px rgba(0,136,255,0.4)}
+        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,136,255,0.6)}
         .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
-        .btn-outline:hover{border-color:var(--primary);box-shadow:0 0 12px rgba(0,136,255,0.3);background:rgba(0,136,255,0.1)}
+        .btn-outline:hover{border-color:var(--primary);box-shadow:0 0 10px rgba(0,136,255,0.3);background:rgba(0,136,255,0.1)}
+        .btn-success{background:var(--success);color:#000}
         .btn-danger{background:var(--danger)}
+        .btn-sm{padding:4px 10px;font-size:10px}
         .btn-icon{
-            width:42px;height:42px;border-radius:50%;
+            width:40px;height:40px;border-radius:50%;
             background:linear-gradient(135deg,var(--primary),var(--accent));
-            border:none;color:#fff;font-size:20px;cursor:pointer;
-            box-shadow:0 4px 18px rgba(0,136,255,0.4);transition:all 0.3s ease;
+            border:none;color:#fff;font-size:18px;cursor:pointer;
+            box-shadow:0 4px 15px rgba(0,136,255,0.4);transition:all 0.3s ease;
             display:flex;align-items:center;justify-content:center;
-            position:fixed;bottom:20px;right:20px;z-index:150;
+            position:fixed;bottom:16px;right:16px;z-index:150;
         }
-        .btn-icon:hover{transform:scale(1.1);box-shadow:0 6px 25px rgba(0,136,255,0.7)}
+        .btn-icon:hover{transform:scale(1.1);box-shadow:0 6px 22px rgba(0,136,255,0.7)}
         .layout{display:flex;flex:1;overflow:hidden}
         .sidebar{
-            width:240px;background:var(--card-bg);backdrop-filter:blur(20px);
-            border-right:1px solid var(--border);padding:14px;
-            overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;gap:8px;
+            width:220px;background:var(--card-bg);backdrop-filter:blur(20px);
+            border-right:1px solid var(--border);padding:10px;
+            overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;gap:6px;
         }
-        .main-content{flex:1;overflow-y:auto;padding:16px 20px}
+        .main-content{flex:1;overflow-y:auto;padding:12px 16px}
         .card{
             background:var(--card-bg);backdrop-filter:blur(20px);
-            border:1px solid var(--border);border-radius:14px;
-            padding:16px;margin-bottom:12px;
-            box-shadow:0 6px 20px rgba(0,0,0,0.4),0 0 12px rgba(0,136,255,0.06);
-            transition:all 0.3s ease;animation:cardAppear 0.5s ease-out;
+            border:1px solid var(--border);border-radius:12px;
+            padding:14px;margin-bottom:10px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.4);
+            transition:all 0.3s ease;animation:cardIn 0.4s ease-out;
         }
-        @keyframes cardAppear{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
-        .card:hover{border-color:rgba(0,150,255,0.4);box-shadow:0 10px 30px rgba(0,0,0,0.5),0 0 25px rgba(0,136,255,0.12)}
-        .post-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-        .post-author{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;cursor:pointer}
-        .post-author:hover{color:var(--primary-glow)}
+        @keyframes cardIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+        .card:hover{border-color:rgba(0,150,255,0.4)}
+        .post-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+        .post-author{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px;cursor:pointer}
         .post-avatar{
-            width:34px;height:34px;border-radius:50%;overflow:hidden;
+            width:30px;height:30px;border-radius:50%;overflow:hidden;
             background:linear-gradient(135deg,var(--primary),var(--accent));
             display:flex;align-items:center;justify-content:center;
-            font-size:14px;box-shadow:0 0 10px rgba(0,136,255,0.3);flex-shrink:0;
-            color:#fff;font-weight:700;
+            font-size:12px;box-shadow:0 0 8px rgba(0,136,255,0.3);flex-shrink:0;color:#fff;font-weight:700;
         }
         .post-avatar img{width:100%;height:100%;object-fit:cover}
         .post-time{color:var(--text-dim);font-size:10px}
-        .post-content{font-size:14px;line-height:1.5;margin-bottom:10px;color:#dde4ff;word-break:break-word}
+        .post-content{font-size:13px;line-height:1.5;margin-bottom:8px;color:#dde4ff;word-break:break-word}
         .mention{color:var(--mention);cursor:pointer;font-weight:600}
-        .mention:hover{text-decoration:underline}
         .hashtag{color:var(--hashtag);cursor:pointer;font-weight:600}
-        .hashtag:hover{text-decoration:underline}
-        .post-actions{display:flex;gap:12px}
+        .post-actions{display:flex;gap:10px}
         .action-btn{
             background:none;border:none;color:var(--text-dim);cursor:pointer;
-            font-size:12px;display:flex;align-items:center;gap:4px;
-            padding:5px 10px;border-radius:6px;transition:all 0.3s ease;
+            font-size:11px;display:flex;align-items:center;gap:3px;
+            padding:4px 8px;border-radius:6px;transition:all 0.3s;
         }
         .action-btn:hover{color:var(--primary-glow);background:rgba(0,136,255,0.1)}
-        .action-btn.liked{color:#ff4477;animation:heartBeat 0.6s ease}
-        @keyframes heartBeat{0%{transform:scale(1)}25%{transform:scale(1.3)}50%{transform:scale(0.9)}100%{transform:scale(1)}}
         input,textarea,select{
-            width:100%;padding:10px 14px;background:rgba(0,30,60,0.5);
-            border:1px solid var(--border);border-radius:10px;
-            color:var(--text);font-size:13px;outline:none;
-            font-family:inherit;transition:all 0.3s ease;
+            width:100%;padding:8px 12px;background:rgba(0,30,60,0.5);
+            border:1px solid var(--border);border-radius:8px;
+            color:var(--text);font-size:12px;outline:none;
+            font-family:inherit;transition:all 0.3s;
         }
-        textarea{resize:vertical;min-height:100px}
+        textarea{resize:vertical;min-height:80px}
         input:focus,textarea:focus,select:focus{
-            border-color:var(--primary);box-shadow:0 0 18px rgba(0,136,255,0.3);background:rgba(0,40,80,0.5)
+            border-color:var(--primary);box-shadow:0 0 15px rgba(0,136,255,0.3);background:rgba(0,40,80,0.5)
         }
-        select{appearance:none;cursor:pointer}
         .modal-overlay{
             display:none;position:fixed;top:0;left:0;width:100%;height:100%;
             background:rgba(0,0,0,0.7);backdrop-filter:blur(5px);
@@ -169,518 +156,403 @@
         .modal-overlay.active{display:flex}
         .modal{
             background:rgba(10,10,35,0.95);backdrop-filter:blur(30px);
-            border:1px solid var(--border);border-radius:18px;
-            padding:24px;max-width:460px;width:90%;max-height:90vh;overflow-y:auto;
-            box-shadow:0 20px 60px rgba(0,0,0,0.8),0 0 60px rgba(0,136,255,0.2);
-            animation:modalIn 0.4s ease;
+            border:1px solid var(--border);border-radius:16px;
+            padding:20px;max-width:480px;width:90%;max-height:85vh;overflow-y:auto;
+            box-shadow:0 20px 50px rgba(0,0,0,0.8);animation:modalIn 0.3s ease;
         }
-        @keyframes modalIn{0%{opacity:0;transform:scale(0.85) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}
-        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-        .modal-close{background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer}
-        .modal-close:hover{color:var(--danger)}
+        @keyframes modalIn{0%{opacity:0;transform:scale(0.85) translateY(15px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+        .modal-close{background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer}
         .toast{
-            position:fixed;top:16px;right:16px;z-index:300;
-            padding:12px 18px;border-radius:10px;font-weight:600;font-size:13px;
+            position:fixed;top:14px;right:14px;z-index:300;
+            padding:10px 16px;border-radius:10px;font-weight:600;font-size:12px;
             backdrop-filter:blur(20px);
             animation:toastIn 0.4s ease,toastOut 0.4s ease 3s forwards;
         }
-        @keyframes toastIn{0%{opacity:0;transform:translateX(60px)}100%{opacity:1;transform:translateX(0)}}
-        @keyframes toastOut{0%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(60px)}}
+        @keyframes toastIn{0%{opacity:0;transform:translateX(50px)}100%{opacity:1;transform:translateX(0)}}
+        @keyframes toastOut{0%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(50px)}}
         .toast-success{background:rgba(0,255,136,0.2);border:1px solid rgba(0,255,136,0.4);color:#00ff88}
         .toast-error{background:rgba(255,68,119,0.2);border:1px solid rgba(255,68,119,0.4);color:#ff4477}
+        .msg-status{font-size:10px;margin-left:4px}
+        .msg-check{color:var(--text-dim)}.msg-double{color:var(--primary)}.msg-read{color:var(--success)}
+        .chat-list-item{
+            padding:8px 10px;border-radius:8px;cursor:pointer;transition:all 0.3s;
+            display:flex;align-items:center;gap:8px;margin-bottom:4px;
+        }
+        .chat-list-item:hover{background:rgba(0,136,255,0.1)}
+        .chat-list-item.active{background:rgba(0,136,255,0.2);border:1px solid var(--primary)}
+        .friend-item{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:8px;border-radius:8px;margin-bottom:4px;
+            background:rgba(0,30,60,0.3);
+        }
+        .msg-bubble{
+            max-width:80%;padding:8px 12px;border-radius:12px;margin:4px 0;
+            word-break:break-word;font-size:12px;
+        }
+        .msg-mine{background:var(--primary);margin-left:auto;border-bottom-right-radius:4px}
+        .msg-other{background:rgba(0,30,60,0.6);margin-right:auto;border-bottom-left-radius:4px}
         .profile-avatar-large{
-            width:80px;height:80px;border-radius:50%;overflow:hidden;
+            width:70px;height:70px;border-radius:50%;overflow:hidden;
             background:linear-gradient(135deg,var(--primary),var(--accent));
             display:flex;align-items:center;justify-content:center;
-            font-size:32px;margin:0 auto 12px;
-            box-shadow:0 0 25px rgba(0,136,255,0.4);color:#fff;font-weight:700;
+            font-size:28px;margin:0 auto 10px;color:#fff;font-weight:700;
+            box-shadow:0 0 20px rgba(0,136,255,0.4);
         }
         .profile-avatar-large img{width:100%;height:100%;object-fit:cover}
-        .subscribe-btn{padding:8px 22px;border-radius:18px;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.3s ease}
-        .subscribe-btn.follow{background:var(--primary);color:#fff;border:none}
-        .subscribe-btn.unfollow{background:transparent;color:var(--danger);border:1px solid var(--danger)}
-        .hashtag-list{display:flex;flex-wrap:wrap;gap:6px}
-        .hashtag-item{
-            padding:5px 12px;background:rgba(0,204,170,0.15);
-            border:1px solid rgba(0,204,170,0.3);border-radius:16px;
-            cursor:pointer;font-size:12px;color:var(--hashtag);transition:all 0.3s ease;
+        .tab-bar{display:flex;gap:0;margin-bottom:10px}
+        .tab{
+            padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;
+            border-bottom:2px solid transparent;transition:all 0.3s;color:var(--text-dim);
         }
-        .hashtag-item:hover{background:rgba(0,204,170,0.3);box-shadow:0 0 12px rgba(0,204,170,0.3)}
-        .settings-section{margin-bottom:16px}
-        .settings-section h4{color:var(--primary-glow);margin-bottom:8px;font-size:13px}
-        .admin-btn{
-            position:fixed;bottom:72px;right:20px;z-index:150;
-            width:32px;height:32px;border-radius:50%;
-            background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);
-            color:rgba(255,255,255,0.4);cursor:pointer;font-size:12px;
-            transition:all 0.3s ease;display:flex;align-items:center;justify-content:center;
-        }
-        .admin-btn:hover{color:var(--primary-glow);border-color:var(--primary);box-shadow:0 0 10px rgba(0,136,255,0.3)}
-        .admin-console{
-            display:none;position:fixed;bottom:115px;right:20px;z-index:150;
-            background:rgba(10,10,30,0.95);border:1px solid var(--border);
-            border-radius:12px;padding:14px;width:260px;
-            box-shadow:0 12px 35px rgba(0,0,0,0.7);
-        }
-        .admin-console.active{display:block;animation:modalIn 0.3s ease}
-        .admin-console h5{color:var(--primary-glow);margin-bottom:8px;font-size:13px}
-        .admin-console input,.admin-console select{width:100%;padding:6px;margin-bottom:6px;font-size:11px}
-        .admin-console .hint{color:var(--text-dim);font-size:10px;margin-bottom:6px}
-        label{display:block;color:var(--text-dim);font-size:11px;margin-bottom:3px}
-        ::-webkit-scrollbar{width:4px}
-        ::-webkit-scrollbar-track{background:transparent}
+        .tab.active{color:var(--primary-glow);border-bottom-color:var(--primary)}
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}
         ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-        @media(max-width:768px){.sidebar{display:none}.btn-icon{bottom:14px;right:14px}}
-        .avatar-upload{cursor:pointer;text-align:center;color:var(--primary);font-size:12px}
+        @media(max-width:768px){.sidebar{display:none}}
     </style>
 </head>
 <body>
-    <div class="bg-animation"></div>
-    <div class="grid-overlay"></div>
-    <div id="particles"></div>
-    <div id="toastContainer"></div>
+<div class="bg-animation"></div><div class="grid-overlay"></div><div id="particles"></div><div id="toastContainer"></div>
 
-    <div class="app">
-        <nav class="navbar">
-            <a class="logo" onclick="showPage('feed')">🐤 Chirper</a>
-            <div class="nav-actions" id="navActions">
-                <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">Войти</button>
-                <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">Регистрация</button>
-            </div>
-        </nav>
-        <div class="layout">
-            <aside class="sidebar" id="sidebar">
-                <button class="btn btn-outline" onclick="showPage('feed')" style="width:100%">📡 Лента</button>
-                <button class="btn btn-outline" onclick="showPage('hashtags')" style="width:100%">🔥 Топ хештегов</button>
-                <button class="btn btn-outline" onclick="openModal('settingsModal')" style="width:100%" id="settingsBtn" disabled>⚙ Настройки</button>
-                <div id="subscriptionsBlock" style="margin-top:8px"></div>
-            </aside>
-            <main class="main-content" id="content"></main>
+<div class="app">
+    <nav class="navbar">
+        <span class="logo" onclick="showPage('feed')">🐤 Chirper</span>
+        <div class="nav-actions" id="navActions">
+            <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">Войти</button>
+            <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">Регистрация</button>
         </div>
+    </nav>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar">
+            <button class="btn btn-outline btn-sm" onclick="showPage('feed')">📡 Лента</button>
+            <button class="btn btn-outline btn-sm" onclick="showPage('hashtags')">🔥 Хештеги</button>
+            <button class="btn btn-outline btn-sm" onclick="showPage('friends')">👥 Друзья</button>
+            <button class="btn btn-outline btn-sm" onclick="showPage('messenger')">💬 Мессенджер</button>
+            <button class="btn btn-outline btn-sm" id="settingsBtn" onclick="openModal('settingsModal')" disabled>⚙ Настройки</button>
+            <div id="subscriptionsBlock" style="margin-top:4px"></div>
+        </aside>
+        <main class="main-content" id="content"></main>
     </div>
+</div>
 
-    <button class="btn-icon" onclick="openModal('postModal')">+</button>
-    <button class="admin-btn" onclick="toggleAdminConsole()">⚙</button>
+<button class="btn-icon" onclick="openModal('postModal')">+</button>
+<button class="btn-icon" onclick="toggleAdmin()" style="bottom:66px;width:30px;height:30px;font-size:12px">⚙</button>
 
-    <div class="admin-console" id="adminConsole">
-        <h5>🔐 Админ-консоль</h5>
-        <input type="password" id="adminPassword" placeholder="Пароль">
-        <label>Тип галочки</label>
-        <select id="adminBadgeType">
-            <option value="white">Белая</option>
-            <option value="gray">Серая</option>
-            <option value="blue">Синяя</option>
-        </select>
-        <input type="text" id="adminCommand" placeholder="verify ник">
-        <div class="hint">verify [ник] — выдать галочку</div>
-        <button class="btn btn-primary btn-sm" onclick="execAdmin()" style="width:100%">OK</button>
-        <div id="adminResult" style="margin-top:5px;font-size:10px"></div>
-    </div>
+<div id="adminConsole" style="display:none;position:fixed;bottom:110px;right:16px;z-index:150;background:rgba(10,10,35,0.95);border:1px solid var(--border);border-radius:10px;padding:12px;width:240px;box-shadow:0 10px 30px rgba(0,0,0,0.7)">
+    <h5 style="color:var(--primary-glow);margin-bottom:6px;font-size:12px">🔐 Админ</h5>
+    <input type="password" id="adminPass" placeholder="Пароль" style="margin-bottom:4px">
+    <select id="adminBadge" style="margin-bottom:4px"><option value="white">Белая</option><option value="gray">Серая</option><option value="blue">Синяя</option></select>
+    <input type="text" id="adminCmd" placeholder="verify ник" style="margin-bottom:4px">
+    <button class="btn btn-primary btn-sm" onclick="execAdmin()" style="width:100%">OK</button>
+    <div id="adminResult" style="font-size:10px;margin-top:4px"></div>
+</div>
 
-    <!-- Пост -->
-    <div class="modal-overlay" id="postModal">
-        <div class="modal">
-            <div class="modal-header"><h3 style="color:var(--primary-glow)">Новый чирик</h3><button class="modal-close" onclick="closeModal('postModal')">&times;</button></div>
-            <textarea id="newPostContent" placeholder="Что нового? @пользователь #хештег" maxlength="280"></textarea>
-            <div style="margin-top:6px;font-size:10px;color:var(--text-dim)"><span id="charCount">0</span>/280 • @упоминание • #хештег</div>
-            <button class="btn btn-primary" onclick="publishPost()" style="margin-top:10px;width:100%">🚀 Опубликовать</button>
-        </div>
-    </div>
+<!-- МОДАЛКИ -->
+<div class="modal-overlay" id="postModal"><div class="modal">
+    <div class="modal-header"><h3 style="color:var(--primary-glow)">Новый чирик</h3><button class="modal-close" onclick="closeModal('postModal')">&times;</button></div>
+    <textarea id="postText" placeholder="Что нового? @ник #тег" maxlength="280"></textarea>
+    <div style="font-size:10px;color:var(--text-dim);margin:4px 0"><span id="charCount">0</span>/280</div>
+    <button class="btn btn-primary" onclick="publishPost()" style="width:100%">🚀 Опубликовать</button>
+</div></div>
 
-    <!-- Вход -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal">
-            <div class="modal-header"><h3 style="color:var(--primary-glow)">Вход</h3><button class="modal-close" onclick="closeModal('loginModal')">&times;</button></div>
-            <input type="email" id="loginEmail" placeholder="Email" style="margin-bottom:8px">
-            <input type="password" id="loginPassword" placeholder="Пароль" style="margin-bottom:8px">
-            <button class="btn btn-primary" onclick="login()" style="width:100%">Войти</button>
-        </div>
-    </div>
+<div class="modal-overlay" id="loginModal"><div class="modal">
+    <div class="modal-header"><h3 style="color:var(--primary-glow)">Вход</h3><button class="modal-close" onclick="closeModal('loginModal')">&times;</button></div>
+    <input type="email" id="loginEmail" placeholder="Email" style="margin-bottom:8px">
+    <input type="password" id="loginPass" placeholder="Пароль" style="margin-bottom:8px">
+    <button class="btn btn-primary" onclick="login()" style="width:100%">Войти</button>
+</div></div>
 
-    <!-- Регистрация -->
-    <div class="modal-overlay" id="registerModal">
-        <div class="modal">
-            <div class="modal-header"><h3 style="color:var(--primary-glow)">Регистрация</h3><button class="modal-close" onclick="closeModal('registerModal')">&times;</button></div>
-            <input type="text" id="regUsername" placeholder="Имя" style="margin-bottom:8px">
-            <input type="email" id="regEmail" placeholder="Email" style="margin-bottom:8px">
-            <input type="password" id="regPassword" placeholder="Пароль" style="margin-bottom:8px">
-            <button class="btn btn-primary" onclick="register()" style="width:100%">Создать</button>
-        </div>
-    </div>
+<div class="modal-overlay" id="registerModal"><div class="modal">
+    <div class="modal-header"><h3 style="color:var(--primary-glow)">Регистрация</h3><button class="modal-close" onclick="closeModal('registerModal')">&times;</button></div>
+    <input type="text" id="regUser" placeholder="Ник" style="margin-bottom:8px">
+    <input type="email" id="regEmail" placeholder="Email" style="margin-bottom:8px">
+    <input type="password" id="regPass" placeholder="Пароль" style="margin-bottom:8px">
+    <button class="btn btn-primary" onclick="register()" style="width:100%">Создать</button>
+</div></div>
 
-    <!-- Настройки -->
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal">
-            <div class="modal-header"><h3 style="color:var(--primary-glow)">⚙ Настройки</h3><button class="modal-close" onclick="closeModal('settingsModal')">&times;</button></div>
-            <div class="settings-section">
-                <h4>Аватар</h4>
-                <input type="file" id="avatarFile" accept="image/*" style="margin-bottom:6px">
-                <button class="btn btn-primary btn-sm" onclick="uploadAvatar()">Загрузить</button>
-            </div>
-            <div class="settings-section">
-                <h4>Сменить ник</h4>
-                <input type="text" id="newUsername" placeholder="Новый ник" style="margin-bottom:6px">
-                <button class="btn btn-primary btn-sm" onclick="changeUsername()">Сменить</button>
-            </div>
-            <div class="settings-section">
-                <h4>Описание</h4>
-                <textarea id="newBio" placeholder="О себе..." maxlength="200" style="min-height:60px;margin-bottom:6px"></textarea>
-                <button class="btn btn-primary btn-sm" onclick="changeBio()">Сохранить</button>
-            </div>
-            <div class="settings-section">
-                <h4>Сменить пароль</h4>
-                <input type="password" id="oldPassword" placeholder="Старый пароль" style="margin-bottom:6px">
-                <input type="password" id="newPassword" placeholder="Новый пароль" style="margin-bottom:6px">
-                <input type="email" id="confirmEmail" placeholder="Email для подтверждения" style="margin-bottom:6px">
-                <button class="btn btn-danger btn-sm" onclick="changePassword()">Сменить пароль</button>
-            </div>
-        </div>
-    </div>
+<div class="modal-overlay" id="settingsModal"><div class="modal">
+    <div class="modal-header"><h3 style="color:var(--primary-glow)">⚙ Настройки</h3><button class="modal-close" onclick="closeModal('settingsModal')">&times;</button></div>
+    <h4 style="color:var(--primary-glow);font-size:12px;margin-bottom:4px">Аватар</h4>
+    <input type="file" id="avatarFile" accept="image/*" style="margin-bottom:6px">
+    <button class="btn btn-primary btn-sm" onclick="uploadAvatar()">Загрузить</button>
+    <h4 style="color:var(--primary-glow);font-size:12px;margin:10px 0 4px">Ник</h4>
+    <input type="text" id="newNick" placeholder="Новый ник" style="margin-bottom:6px">
+    <button class="btn btn-primary btn-sm" onclick="changeNick()">Сменить</button>
+    <h4 style="color:var(--primary-glow);font-size:12px;margin:10px 0 4px">Описание</h4>
+    <textarea id="newBio" placeholder="О себе..." maxlength="200" style="min-height:50px;margin-bottom:6px"></textarea>
+    <button class="btn btn-primary btn-sm" onclick="changeBio()">Сохранить</button>
+    <h4 style="color:var(--primary-glow);font-size:12px;margin:10px 0 4px">Пароль</h4>
+    <input type="password" id="oldPass" placeholder="Старый" style="margin-bottom:4px">
+    <input type="password" id="newPass" placeholder="Новый" style="margin-bottom:4px">
+    <input type="email" id="confirmEmail" placeholder="Email для подтверждения" style="margin-bottom:6px">
+    <button class="btn btn-danger btn-sm" onclick="changePass()">Сменить пароль</button>
+</div></div>
 
-    <script>
-        const API = 'https://chirper-api-abc.onrender.com';
-        const ADMIN_PASS = 'bdfkatop123';
-        let uid = localStorage.getItem('uid');
-        let uname = localStorage.getItem('uname');
-        let vrf = localStorage.getItem('vrf');
-        let vrfType = localStorage.getItem('vrf_type') || '';
-        let subs = JSON.parse(localStorage.getItem('subs') || '[]');
-        let currentPage = 'feed';
-        let profileUser = null;
+<div class="modal-overlay" id="chatModal"><div class="modal" id="chatModalContent"></div></div>
 
-        function createParticles(){
-            const c=document.getElementById('particles');
-            for(let i=0;i<50;i++){
-                const p=document.createElement('div');
-                p.className='particle';
-                p.style.left=Math.random()*100+'%';
-                p.style.animationDuration=(4+Math.random()*8)+'s';
-                p.style.animationDelay=Math.random()*8+'s';
-                p.style.width=(1+Math.random()*3)+'px';
-                p.style.height=p.style.width;
-                c.appendChild(p);
-            }
+<script>
+const API='https://chirper-api-abc.onrender.com';
+const ADMIN_PASS='bdfkatop123';
+let uid=localStorage.getItem('uid');
+let uname=localStorage.getItem('uname');
+let vrf=localStorage.getItem('vrf');
+let vrfType=localStorage.getItem('vrf_type')||'';
+let subs=JSON.parse(localStorage.getItem('subs')||'[]');
+let currentChat=null;
+let chatInterval=null;
+
+function toast(m,t='success'){
+    const c=document.getElementById('toastContainer');
+    const d=document.createElement('div');
+    d.className=`toast toast-${t}`;d.textContent=m;
+    c.appendChild(d);setTimeout(()=>d.remove(),3400);
+}
+
+function openModal(id){document.getElementById(id).classList.add('active')}
+function closeModal(id){document.getElementById(id).classList.remove('active')}
+
+function badgeHtml(v,t){
+    if(!v||v==='false')return'';
+    const cls=t==='white'?'verified-white':t==='gray'?'verified-gray':'verified-blue';
+    const sym=t==='white'?'◇':t==='gray'?'◆':'✓';
+    return`<span class="verified-badge ${cls}">${sym}</span>`;
+}
+
+function onlineDot(u){return u.online?'<span class="status-dot status-online"></span>':`<span class="status-dot status-offline" title="Был: ${new Date(u.last_seen).toLocaleString('ru-RU')}"></span>`}
+
+async function api(method,endpoint,data=null){
+    try{
+        const opts={method,headers:{'Content-Type':'application/json'}};
+        if(data)opts.body=JSON.stringify(data);
+        const r=await fetch(`${API}${endpoint}`,opts);
+        const j=await r.json();
+        if(!r.ok)throw new Error(j.error||'Error');
+        return j;
+    }catch(e){toast(e.message,'error');return null}
+}
+
+async function apiForm(endpoint,fd){
+    try{
+        const r=await fetch(`${API}${endpoint}`,{method:'POST',body:fd});
+        const j=await r.json();
+        if(!r.ok)throw new Error(j.error||'Error');
+        return j;
+    }catch(e){toast(e.message,'error');return null}
+}
+
+// Админ
+function toggleAdmin(){document.getElementById('adminConsole').style.display=document.getElementById('adminConsole').style.display==='none'?'block':'none'}
+async function execAdmin(){
+    const pw=document.getElementById('adminPass').value;
+    const cmd=document.getElementById('adminCmd').value.trim();
+    const type=document.getElementById('adminBadge').value;
+    if(pw!==ADMIN_PASS){document.getElementById('adminResult').innerHTML='<span style="color:#f44">Неверный пароль</span>';return}
+    const target=cmd.replace('verify ','').trim();
+    const data=await api('POST','/verify',{username:target,badge_type:type});
+    if(data){
+        document.getElementById('adminResult').innerHTML=`<span style="color:#0f8">✅ ${data.message}</span>`;
+        if(uname===target){vrf='true';vrfType=type;localStorage.setItem('vrf','true');localStorage.setItem('vrf_type',type);updateNav()}
+    }
+}
+
+// Регистрация/Вход
+async function register(){
+    const r=await api('POST','/register',{username:document.getElementById('regUser').value.trim(),email:document.getElementById('regEmail').value.trim(),password:document.getElementById('regPass').value});
+    if(r){uid=r.user_id;uname=r.username;vrf=r.verified?'true':'false';vrfType=r.badge_type||'';save();closeModal('registerModal');updateNav();showPage('feed');toast(`Добро пожаловать, ${uname}!`);startHeartbeat()}
+}
+async function login(){
+    const r=await api('POST','/login',{email:document.getElementById('loginEmail').value.trim(),password:document.getElementById('loginPass').value});
+    if(r){uid=r.user_id;uname=r.username;vrf=r.verified?'true':'false';vrfType=r.badge_type||'';save();closeModal('loginModal');updateNav();showPage('feed');toast(`С возвращением, ${uname}!`);startHeartbeat()}
+}
+function logout(){
+    if(uid)api('POST','/logout',{user_id:parseInt(uid)});
+    uid=null;uname=null;vrf='false';vrfType='';localStorage.clear();subs=[];stopHeartbeat();
+    updateNav();showPage('feed');
+}
+function save(){localStorage.setItem('uid',uid);localStorage.setItem('uname',uname);localStorage.setItem('vrf',vrf);localStorage.setItem('vrf_type',vrfType)}
+function startHeartbeat(){stopHeartbeat();chatInterval=setInterval(()=>{if(uid)api('POST','/heartbeat',{user_id:parseInt(uid)})},30000)}
+function stopHeartbeat(){if(chatInterval)clearInterval(chatInterval)}
+
+function updateNav(){
+    const a=document.getElementById('navActions');
+    const sb=document.getElementById('settingsBtn');
+    if(uid){
+        a.innerHTML=`<span style="font-weight:600">${uname}</span> ${badgeHtml(vrf,vrfType)}<button class="btn btn-outline btn-sm" onclick="showPage('feed')">Лента</button><button class="btn btn-primary btn-sm" onclick="logout()">Выйти</button>`;
+        sb.disabled=false;
+    }else{a.innerHTML=`<button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">Войти</button><button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">Регистрация</button>`;sb.disabled=true}
+    updateSubs();
+}
+function updateSubs(){
+    const b=document.getElementById('subscriptionsBlock');
+    if(!uid||subs.length===0){b.innerHTML='';return}
+    b.innerHTML='<div style="color:var(--text-dim);font-size:10px;margin:4px 0">Подписки</div>'+subs.map(s=>`<button class="btn btn-outline btn-sm" onclick="showProfile('${s}')" style="width:100%">@${s}</button>`).join('');
+}
+function toggleSub(un){
+    const i=subs.indexOf(un);
+    if(i>=0){subs.splice(i,1);toast(`Отписались от @${un}`)}else{subs.push(un);toast(`Подписались на @${un}`)}
+    localStorage.setItem('subs',JSON.stringify(subs));updateSubs();
+}
+
+function parseContent(t){return t.replace(/@(\w+)/g,'<span class="mention" onclick="showProfile(\'$1\')">@$1</span>').replace(/#(\w+)/g,'<span class="hashtag" onclick="showHashtag(\'$1\')">#$1</span>')}
+
+// Настройки
+async function uploadAvatar(){
+    const f=document.getElementById('avatarFile').files[0];
+    if(!f)return toast('Выберите файл','error');
+    const fd=new FormData();fd.append('avatar',f);fd.append('user_id',uid);
+    await apiForm('/upload-avatar',fd);toast('Аватар обновлён!');
+}
+async function changeNick(){
+    const n=document.getElementById('newNick').value.trim();
+    if(!n)return;
+    const r=await api('POST','/update-profile',{user_id:parseInt(uid),username:n});
+    if(r){uname=n;localStorage.setItem('uname',uname);updateNav();toast('Ник изменён!')}
+}
+async function changeBio(){
+    await api('POST','/update-profile',{user_id:parseInt(uid),bio:document.getElementById('newBio').value.trim()});
+    toast('Описание сохранено!');
+}
+async function changePass(){
+    const r=await api('POST','/change-password',{user_id:parseInt(uid),old_password:document.getElementById('oldPass').value,new_password:document.getElementById('newPass').value,email:document.getElementById('confirmEmail').value});
+    if(r)toast('Пароль изменён!');
+}
+
+// Посты
+async function publishPost(){
+    const c=document.getElementById('postText').value.trim();
+    if(!c)return toast('Напишите текст!','error');
+    await api('POST','/post',{content:c,user_id:parseInt(uid)});
+    toast('Опубликовано!');closeModal('postModal');document.getElementById('postText').value='';document.getElementById('charCount').textContent='0';
+    showPage('feed');
+}
+async function likePost(pid,btn){
+    const r=await api('POST',`/like/${pid}`);
+    if(r){btn.querySelector('.lc').textContent=r.likes}
+}
+
+// Страницы
+async function showPage(page,param=null){
+    const c=document.getElementById('content');c.innerHTML='<div style="text-align:center;padding:40px">Загрузка...</div>';
+    if(page==='feed'){
+        const posts=await api('GET','/posts');
+        c.innerHTML=(posts&&posts.length?posts.map(p=>`<div class="card"><div class="post-header"><div class="post-author" onclick="showProfile('${p.author.username}')"><div class="post-avatar">${p.author.avatar_url?`<img src="${API}${p.author.avatar_url}">`:p.author.username[0]}</div><span>${p.author.username}</span>${badgeHtml(p.author.verified,p.author.badge_type)}</div><span class="post-time">${new Date(p.timestamp).toLocaleString('ru-RU')}</span></div><div class="post-content">${parseContent(p.content)}</div><div class="post-actions"><button class="action-btn" onclick="likePost(${p.id},this)">❤️ <span class="lc">${p.likes}</span></button></div></div>`).join(''):'<div class="card" style="text-align:center">Нет постов 🐤</div>');
+    }else if(page==='profile'){
+        const data=await api('GET',`/user/${param}`);if(!data)return showPage('feed');
+        const u=data.user,f=data.friends||[],m=await getMutual(param);
+        c.innerHTML=`<div style="text-align:center;padding:10px 0"><div class="profile-avatar-large">${u.avatar_url?`<img src="${API}${u.avatar_url}">`:u.username[0]}</div><h2>${onlineDot(u)} ${u.username} ${badgeHtml(u.verified,u.badge_type)}</h2><p style="color:var(--text-dim)">${u.bio||''}</p>${uid&&param!==uname?`<button class="btn ${subs.includes(param)?'btn-outline':'btn-primary'} btn-sm" onclick="toggleSub('${param}')">${subs.includes(param)?'Отписаться':'Подписаться'}</button>`:''}${uid&&param!==uname?`<button class="btn btn-primary btn-sm" onclick="sendFriendReq('${param}')">👥 В друзья</button>`:''}<div style="margin-top:10px"><strong>Друзья:</strong> ${f.map(fr=>`<span style="cursor:pointer;color:var(--mention)" onclick="showProfile('${fr.username}')">${fr.username}</span>`).join(', ')||'нет'}</div>${m.length?`<div style="margin-top:4px"><strong>Общие друзья:</strong> ${m.map(fr=>`<span style="cursor:pointer;color:var(--mention)" onclick="showProfile('${fr.username}')">${fr.username}</span>`).join(', ')}</div>`:''}</div>`;
+        c.innerHTML+=(data.posts&&data.posts.length?data.posts.map(p=>`<div class="card"><div class="post-header"><span class="post-time">${new Date(p.timestamp).toLocaleString('ru-RU')}</span></div><div class="post-content">${parseContent(p.content)}</div><div class="post-actions">❤️ ${p.likes}</div></div>`).join(''):'<div class="card" style="text-align:center">Нет постов</div>');
+    }else if(page==='hashtags'){
+        const posts=await api('GET','/posts'),ht={};
+        if(posts)posts.forEach(p=>{const t=p.content.match(/#(\w+)/g);if(t)t.forEach(x=>{const w=x.slice(1).toLowerCase();ht[w]=(ht[w]||0)+1})});
+        const s=Object.entries(ht).sort((a,b)=>b[1]-a[1]).slice(0,100);
+        c.innerHTML='<h2 style="color:var(--primary-glow);margin-bottom:10px">🔥 Топ хештегов</h2><div style="display:flex;flex-wrap:wrap;gap:6px">'+(s.length?s.map(([t,n])=>`<span style="padding:6px 12px;background:rgba(0,204,170,0.15);border:1px solid rgba(0,204,170,0.3);border-radius:16px;cursor:pointer;font-size:12px;color:var(--hashtag)" onclick="showHashtag('${t}')">#${t} (${n})</span>`).join(''):'Нет хештегов')+'</div>';
+    }else if(page==='friends'){
+        if(!uid)return c.innerHTML='<div class="card">Войдите</div>';
+        const reqs=await api('GET',`/friend-requests/${uid}`);
+        const friends=await api('GET',`/friends/${uid}`);
+        let h='<h2 style="color:var(--primary-glow);margin-bottom:10px">👥 Друзья</h2>';
+        h+=`<div style="margin-bottom:8px"><input type="text" id="friendSearch" placeholder="Ник друга" style="width:auto;display:inline;margin-right:6px"><button class="btn btn-primary btn-sm" onclick="sendFriendReq(document.getElementById('friendSearch').value)">Добавить</button></div>`;
+        if(reqs&&reqs.incoming&&reqs.incoming.length){
+            h+='<h4 style="color:var(--primary-glow);margin:8px 0">Входящие заявки</h4>';
+            reqs.incoming.forEach(r=>h+=`<div class="friend-item"><span onclick="showProfile('${r.from.username}')" style="cursor:pointer">${r.from.username}</span><div><button class="btn btn-success btn-sm" onclick="acceptReq(${r.id})">✓</button><button class="btn btn-danger btn-sm" onclick="rejectReq(${r.id})">✕</button></div></div>`);
         }
-
-        function toast(m,t='success'){
-            const c=document.getElementById('toastContainer');
-            const d=document.createElement('div');
-            d.className=`toast toast-${t}`;
-            d.textContent=m;
-            c.appendChild(d);
-            setTimeout(()=>d.remove(),3400);
+        if(reqs&&reqs.outgoing&&reqs.outgoing.length){
+            h+='<h4 style="color:var(--text-dim);margin:8px 0">Исходящие</h4>';
+            reqs.outgoing.forEach(r=>h+=`<div class="friend-item"><span>${r.to.username}</span><span style="color:var(--text-dim);font-size:10px">ожидание</span></div>`);
         }
-
-        function openModal(id){document.getElementById(id).classList.add('active')}
-        function closeModal(id){document.getElementById(id).classList.remove('active')}
-
-        function getBadgeClass(type){
-            if(type==='white') return 'verified-white';
-            if(type==='gray') return 'verified-gray';
-            return 'verified-blue';
-        }
-
-        function getBadgeSymbol(type){
-            if(type==='white') return '◇';
-            if(type==='gray') return '◆';
-            return '✓';
-        }
-
-        function badgeHtml(v,t){
-            if(!v||v==='false') return '';
-            const cls=getBadgeClass(t||'blue');
-            const sym=getBadgeSymbol(t||'blue');
-            return `<span class="verified-badge ${cls}" title="${t||'blue'}">${sym}</span>`;
-        }
-
-        async function api(method, endpoint, data=null){
-            const h={'Content-Type':'application/json'};
-            try{
-                const r=await fetch(`${API}${endpoint}`,{method,headers:h,body:data?JSON.stringify(data):null});
-                const j=await r.json();
-                if(!r.ok) throw new Error(j.error||'Error');
-                return j;
-            }catch(e){toast(e.message,'error');return null}
-        }
-
-        async function apiForm(endpoint, formData){
-            try{
-                const r=await fetch(`${API}${endpoint}`,{method:'POST',body:formData});
-                const j=await r.json();
-                if(!r.ok) throw new Error(j.error||'Error');
-                return j;
-            }catch(e){toast(e.message,'error');return null}
-        }
-
-        // Админ
-        function toggleAdminConsole(){
-            document.getElementById('adminConsole').classList.toggle('active');
-        }
-        async function execAdmin(){
-            const pw=document.getElementById('adminPassword').value;
-            const cmd=document.getElementById('adminCommand').value.trim();
-            const type=document.getElementById('adminBadgeType').value;
-            const res=document.getElementById('adminResult');
-            if(pw!==ADMIN_PASS){res.innerHTML='<span style="color:#f44">Неверный пароль</span>';return}
-            if(!cmd.startsWith('verify ')){res.innerHTML='<span style="color:#f44">verify [ник]</span>';return}
-            const target=cmd.replace('verify ','').trim();
-            const data=await api('POST','/verify',{username:target,badge_type:type});
-            if(data){
-                res.innerHTML=`<span style="color:#0f8">✅ ${data.message}</span>`;
-                if(uname===target){vrf='true';vrfType=type;localStorage.setItem('vrf','true');localStorage.setItem('vrf_type',type);updateNav()}
-                showPage(currentPage);
-            }
-        }
-
-        // Аватар
-        async function uploadAvatar(){
-            const file=document.getElementById('avatarFile').files[0];
-            if(!file){toast('Выберите файл','error');return}
-            if(!uid){toast('Войдите','error');return}
-            const fd=new FormData();
-            fd.append('avatar',file);
-            fd.append('user_id',uid);
-            const data=await apiForm('/upload-avatar',fd);
-            if(data) toast('Аватар обновлён!');
-        }
-
-        // Регистрация/Вход
-        async function register(){
-            const u=document.getElementById('regUsername').value.trim();
-            const e=document.getElementById('regEmail').value.trim();
-            const p=document.getElementById('regPassword').value;
-            const r=await api('POST','/register',{username:u,email:e,password:p});
-            if(r){
-                uid=r.user_id;uname=r.username;vrf=r.verified?'true':'false';vrfType=r.badge_type||'';
-                localStorage.setItem('uid',uid);localStorage.setItem('uname',uname);
-                localStorage.setItem('vrf',vrf);localStorage.setItem('vrf_type',vrfType);
-                closeModal('registerModal');updateNav();showPage('feed');
-                toast(`Добро пожаловать, ${uname}!`);
-            }
-        }
-        async function login(){
-            const e=document.getElementById('loginEmail').value.trim();
-            const p=document.getElementById('loginPassword').value;
-            const r=await api('POST','/login',{email:e,password:p});
-            if(r){
-                uid=r.user_id;uname=r.username;vrf=r.verified?'true':'false';vrfType=r.badge_type||'';
-                localStorage.setItem('uid',uid);localStorage.setItem('uname',uname);
-                localStorage.setItem('vrf',vrf);localStorage.setItem('vrf_type',vrfType);
-                closeModal('loginModal');updateNav();showPage('feed');
-                toast(`С возвращением, ${uname}!`);
-            }
-        }
-        function logout(){
-            uid=null;uname=null;vrf='false';vrfType='';
-            localStorage.clear();subs=[];
-            updateNav();showPage('feed');
-        }
-
-        // Смена данных
-        async function changeUsername(){
-            const nu=document.getElementById('newUsername').value.trim();
-            if(!nu)return toast('Введите ник','error');
-            const data=await api('POST','/update-profile',{user_id:parseInt(uid),username:nu});
-            if(data){uname=nu;localStorage.setItem('uname',uname);updateNav();toast('Ник изменён!')}
-        }
-        async function changeBio(){
-            const bio=document.getElementById('newBio').value.trim();
-            const data=await api('POST','/update-profile',{user_id:parseInt(uid),bio});
-            if(data) toast('Описание сохранено!');
-        }
-        async function changePassword(){
-            const old=document.getElementById('oldPassword').value;
-            const np=document.getElementById('newPassword').value;
-            const email=document.getElementById('confirmEmail').value;
-            if(!old||!np||!email)return toast('Все поля обязательны','error');
-            const data=await api('POST','/change-password',{user_id:parseInt(uid),old_password:old,new_password:np,email});
-            if(data) toast('Пароль изменён! Проверьте почту.');
-        }
-
-        function updateNav(){
-            const a=document.getElementById('navActions');
-            const sb=document.getElementById('settingsBtn');
-            if(uid){
-                a.innerHTML=`<span style="font-weight:600">${uname}</span> ${badgeHtml(vrf,vrfType)}
-                    <button class="btn btn-outline btn-sm" onclick="showPage('feed')">Лента</button>
-                    <button class="btn btn-primary btn-sm" onclick="logout()">Выйти</button>`;
-                sb.disabled=false;
-            }else{
-                a.innerHTML=`<button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">Войти</button>
-                    <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">Регистрация</button>`;
-                sb.disabled=true;
-            }
-            updateSubscriptions();
-        }
-
-        function updateSubscriptions(){
-            const b=document.getElementById('subscriptionsBlock');
-            if(!uid||subs.length===0){b.innerHTML='';return}
-            b.innerHTML='<div style="color:var(--text-dim);font-size:11px;margin-bottom:4px">Подписки</div>'+
-                subs.map(s=>`<button class="btn btn-outline btn-sm" onclick="showProfile('${s}')" style="width:100%">@${s}</button>`).join('');
-        }
-
-        function toggleSub(un){
-            const idx=subs.indexOf(un);
-            if(idx>=0){subs.splice(idx,1);toast(`Отписались от @${un}`)}
-            else{subs.push(un);toast(`Подписались на @${un}`)}
-            localStorage.setItem('subs',JSON.stringify(subs));
-            updateSubscriptions();
-            if(currentPage==='profile'&&profileUser) showProfile(profileUser);
-        }
-
-        function parseContent(text){
-            return text
-                .replace(/@(\w+)/g,'<span class="mention" onclick="showProfile(\'$1\')">@$1</span>')
-                .replace(/#(\w+)/g,'<span class="hashtag" onclick="showHashtag(\'$1\')">#$1</span>');
-        }
-
-        async function showPage(page, param=null){
-            currentPage=page;
-            const content=document.getElementById('content');
-            content.innerHTML='<div style="text-align:center;padding:40px">Загрузка...</div>';
-
-            if(page==='feed'){
-                const posts=await api('GET','/posts');
-                let html='';
-                if(posts&&posts.length>0){
-                    html=posts.map(p=>`
-                        <div class="card">
-                            <div class="post-header">
-                                <div class="post-author" onclick="showProfile('${p.author.username}')">
-                                    <div class="post-avatar">${p.author.avatar_url?`<img src="${p.author.avatar_url}" alt="">`:p.author.username[0]}</div>
-                                    <span>${p.author.username}</span>
-                                    ${badgeHtml(p.author.verified,p.author.badge_type)}
-                                </div>
-                                <span class="post-time">${new Date(p.timestamp).toLocaleString('ru-RU')}</span>
-                            </div>
-                            <div class="post-content">${parseContent(p.content)}</div>
-                            <div class="post-actions">
-                                <button class="action-btn" onclick="likePost(${p.id},this)">❤️ <span class="lc">${p.likes}</span></button>
-                            </div>
-                        </div>
-                    `).join('');
-                }else{html='<div class="card" style="text-align:center">Нет постов 🐤</div>'}
-                content.innerHTML=html;
-            }else if(page==='profile'){
-                const data=await api('GET',`/user/${param}`);
-                if(!data)return showPage('feed');
-                profileUser=param;
-                const u=data.user;
-                const posts=data.posts||[];
-                const isSub=subs.includes(param);
-                let html=`
-                    <div style="text-align:center;padding:20px 0">
-                        <div class="profile-avatar-large">${u.avatar_url?`<img src="${u.avatar_url}" alt="">`:u.username[0]}</div>
-                        <h2>${u.username} ${badgeHtml(u.verified,u.badge_type)}</h2>
-                        <p style="color:var(--text-dim)">${u.bio||''}</p>
-                        ${uid&&param!==uname?`
-                            <button class="subscribe-btn ${isSub?'unfollow':'follow'}" onclick="toggleSub('${param}')">
-                                ${isSub?'Отписаться':'Подписаться'}
-                            </button>
-                        `:''}
-                    </div>
-                `;
-                if(posts.length>0){
-                    html+=posts.map(p=>`
-                        <div class="card">
-                            <div class="post-header"><span class="post-time">${new Date(p.timestamp).toLocaleString('ru-RU')}</span></div>
-                            <div class="post-content">${parseContent(p.content)}</div>
-                            <div class="post-actions"><span style="color:var(--text-dim)">❤️ ${p.likes}</span></div>
-                        </div>
-                    `).join('');
-                }else{html+='<div class="card" style="text-align:center">Нет постов</div>'}
-                content.innerHTML=html;
-            }else if(page==='hashtags'){
-                const posts=await api('GET','/posts');
-                const ht={};
-                if(posts) posts.forEach(p=>{
-                    const tags=p.content.match(/#(\w+)/g);
-                    if(tags) tags.forEach(t=>{const w=t.slice(1).toLowerCase();ht[w]=(ht[w]||0)+1});
-                });
-                const sorted=Object.entries(ht).sort((a,b)=>b[1]-a[1]).slice(0,100);
-                let html='<h2 style="color:var(--primary-glow);margin-bottom:14px">🔥 Топ хештегов</h2><div class="hashtag-list">';
-                if(sorted.length>0) sorted.forEach(([tag,count])=>html+=`<span class="hashtag-item" onclick="showHashtag('${tag}')">#${tag} (${count})</span>`);
-                else html+='<p style="color:var(--text-dim)">Нет хештегов</p>';
-                html+='</div>';
-                content.innerHTML=html;
-            }else if(page==='hashtag'){
-                const posts=await api('GET','/posts');
-                const filtered=posts?posts.filter(p=>{
-                    const tags=p.content.match(/#(\w+)/g);
-                    return tags&&tags.some(t=>t.slice(1).toLowerCase()===param.toLowerCase());
-                }):[];
-                let html=`<h2 style="color:var(--hashtag);margin-bottom:14px">#${param}</h2>`;
-                if(filtered.length>0){
-                    html+=filtered.map(p=>`
-                        <div class="card">
-                            <div class="post-header">
-                                <div class="post-author" onclick="showProfile('${p.author.username}')">
-                                    <div class="post-avatar">${p.author.avatar_url?`<img src="${p.author.avatar_url}" alt="">`:p.author.username[0]}</div>
-                                    <span>${p.author.username}</span>
-                                    ${badgeHtml(p.author.verified,p.author.badge_type)}
-                                </div>
-                                <span class="post-time">${new Date(p.timestamp).toLocaleString('ru-RU')}</span>
-                            </div>
-                            <div class="post-content">${parseContent(p.content)}</div>
-                            <div class="post-actions">❤️ ${p.likes}</div>
-                        </div>
-                    `).join('');
-                }else{html+='<div class="card" style="text-align:center">Нет постов</div>'}
-                html+=`<button class="btn btn-outline" onclick="showPage('hashtags')" style="margin-top:10px">← Назад</button>`;
-                content.innerHTML=html;
-            }
-        }
-
-        function showProfile(u){showPage('profile',u)}
-        function showHashtag(t){showPage('hashtag',t)}
-
-        async function publishPost(){
-            const content=document.getElementById('newPostContent').value.trim();
-            if(!content){toast('Напишите текст!','error');return}
-            if(!uid){toast('Войдите!','error');return}
-            const r=await api('POST','/post',{content,user_id:parseInt(uid)});
-            if(r){
-                toast('Опубликовано!');
-                closeModal('postModal');
-                document.getElementById('newPostContent').value='';
-                document.getElementById('charCount').textContent='0';
-                showPage('feed');
-            }
-        }
-
-        async function likePost(pid,btn){
-            if(!uid){toast('Войдите!','error');return}
-            const r=await api('POST',`/like/${pid}`);
-            if(r){
-                btn.querySelector('.lc').textContent=r.likes;
-                btn.classList.add('liked');
-                setTimeout(()=>btn.classList.remove('liked'),600);
-            }
-        }
-
-        document.getElementById('newPostContent').addEventListener('input',function(){
-            document.getElementById('charCount').textContent=this.value.length;
+        h+='<h4 style="color:var(--primary-glow);margin:8px 0">Список друзей</h4>';
+        if(friends&&friends.length)friends.forEach(f=>h+=`<div class="friend-item"><span onclick="showProfile('${f.username}')" style="cursor:pointer">${onlineDot(f)} ${f.username}</span><button class="btn btn-outline btn-sm" onclick="startChat(${f.id},'${f.username}')">💬</button></div>`);
+        else h+='<p style="color:var(--text-dim)">Нет друзей</p>';
+        c.innerHTML=h;
+    }else if(page==='messenger'){
+        if(!uid)return c.innerHTML='<div class="card">Войдите</div>';
+        const chats=await api('GET',`/chats/${uid}`);
+        let h='<h2 style="color:var(--primary-glow);margin-bottom:10px">💬 Сообщения</h2>';
+        h+='<button class="btn btn-primary btn-sm" onclick="createGroupChat()" style="margin-bottom:8px">+ Групповой чат</button><div style="display:flex;gap:10px">';
+        h+='<div style="width:35%;border-right:1px solid var(--border);padding-right:8px">';
+        if(chats&&chats.length)chats.forEach(ch=>{
+            const name=ch.is_group?ch.name||'Группа':ch.members.find(m=>m.username!==uname)?.username||'Чат';
+            h+=`<div class="chat-list-item" onclick="openChat(${ch.id})" id="chat-item-${ch.id}">${ch.avatar_url?`<img src="${API}${ch.avatar_url}" style="width:24px;height:24px;border-radius:50%">`:''}<span>${name}</span></div>`;
         });
+        else h+='<p style="color:var(--text-dim);font-size:11px">Нет чатов</p>';
+        h+='</div><div style="width:65%" id="chatArea"><p style="color:var(--text-dim)">Выберите чат</p></div></div>';
+        c.innerHTML=h;
+    }
+}
 
-        document.addEventListener('click',e=>{
-            if(e.target.classList.contains('modal-overlay'))e.target.classList.remove('active');
-            const ac=document.getElementById('adminConsole'),ab=document.querySelector('.admin-btn');
-            if(!ac.contains(e.target)&&e.target!==ab&&ac.classList.contains('active'))ac.classList.remove('active');
-        });
+function showProfile(u){showPage('profile',u)}
+function showHashtag(t){
+    api('GET','/posts').then(posts=>{
+        const f=posts?posts.filter(p=>{const tags=p.content.match(/#(\w+)/g);return tags&&tags.some(x=>x.slice(1).toLowerCase()===t.toLowerCase())}):[];
+        document.getElementById('content').innerHTML=`<h2 style="color:var(--hashtag)">#${t}</h2>${f.length?f.map(p=>`<div class="card"><div class="post-header"><div class="post-author" onclick="showProfile('${p.author.username}')"><div class="post-avatar">${p.author.avatar_url?`<img src="${API}${p.author.avatar_url}">`:p.author.username[0]}</div><span>${p.author.username}</span>${badgeHtml(p.author.verified,p.author.badge_type)}</div><span class="post-time">${new Date(p.timestamp).toLocaleString('ru-RU')}</span></div><div class="post-content">${parseContent(p.content)}</div><div class="post-actions">❤️ ${p.likes}</div></div>`).join(''):'<div class="card">Нет постов</div>'}<button class="btn btn-outline btn-sm" onclick="showPage(\'hashtags\')">← Назад</button>`;
+    });
+}
 
-        document.addEventListener('keypress',e=>{
-            if(e.key==='Enter'){
-                if(document.getElementById('loginModal').classList.contains('active'))login();
-                if(document.getElementById('registerModal').classList.contains('active'))register();
-                if(document.getElementById('adminConsole').classList.contains('active'))execAdmin();
-                if(document.getElementById('postModal').classList.contains('active'))publishPost();
-            }
-        });
+// Друзья
+async function sendFriendReq(nick){
+    if(!nick)return toast('Введите ник','error');
+    const r=await api('POST','/friend-request',{from_id:parseInt(uid),to_username:nick});
+    if(r){toast('Заявка отправлена!');showPage('friends')}
+}
+async function acceptReq(rid){await api('POST',`/friend-request/${rid}/accept`);toast('Принято!');showPage('friends')}
+async function rejectReq(rid){await api('POST',`/friend-request/${rid}/reject`);showPage('friends')}
+async function getMutual(u){
+    if(!uid)return[];
+    const data=await api('GET',`/mutual-friends/${uid}/${u}`);
+    return data||[];
+}
 
-        createParticles();
-        updateNav();
-        showPage('feed');
-    </script>
+// Чаты
+async function createGroupChat(){
+    const name=prompt('Название чата:');
+    if(!name)return;
+    const r=await api('POST','/chat',{creator_id:parseInt(uid),name,is_group:true});
+    if(r){toast('Чат создан!');showPage('messenger')}
+}
+async function startChat(oid,oname){
+    const r=await api('POST','/chat',{creator_id:parseInt(uid),other_user_id:oid,is_group:false,name:oname});
+    if(r){toast('Чат открыт!');showPage('messenger')}
+}
+async function openChat(cid){
+    currentChat=cid;
+    document.querySelectorAll('.chat-list-item').forEach(el=>el.classList.remove('active'));
+    document.getElementById(`chat-item-${cid}`)?.classList.add('active');
+    const msgs=await api('GET',`/chat/${cid}/messages`);
+    const area=document.getElementById('chatArea');
+    if(!area)return;
+    let h='';
+    if(msgs&&msgs.length)msgs.forEach(m=>{
+        const isMine=m.sender_id==uid;
+        const status=m.read?'read':m.delivered?'delivered':'sent';
+        const statusIcon=status==='read'?'✓✓':status==='delivered'?'✓✓':'✓';
+        const statusClass=status==='read'?'msg-read':status==='delivered'?'msg-double':'msg-check';
+        h+=`<div class="msg-bubble ${isMine?'msg-mine':'msg-other'}"><strong>${m.sender.username}</strong><br>${m.content}<br><span style="font-size:9px;color:var(--text-dim)">${new Date(m.timestamp).toLocaleTimeString('ru-RU')} <span class="${statusClass}">${statusIcon}</span></span></div>`;
+    });
+    h+=`<div style="margin-top:8px;display:flex;gap:6px"><input type="text" id="msgInput" placeholder="Сообщение..." style="flex:1"><button class="btn btn-primary btn-sm" onclick="sendMsg(${cid})">➤</button></div>`;
+    area.innerHTML=h;
+    document.getElementById('msgInput')?.addEventListener('keypress',e=>{if(e.key==='Enter')sendMsg(cid)});
+    document.getElementById('msgInput')?.focus();
+}
+async function sendMsg(cid){
+    const inp=document.getElementById('msgInput');
+    if(!inp||!inp.value.trim())return;
+    await api('POST',`/chat/${cid}/message`,{sender_id:parseInt(uid),content:inp.value.trim()});
+    inp.value='';
+    openChat(cid);
+}
+
+document.getElementById('postText').addEventListener('input',function(){document.getElementById('charCount').textContent=this.value.length});
+document.addEventListener('click',e=>{if(e.target.classList.contains('modal-overlay'))e.target.classList.remove('active')});
+document.addEventListener('keypress',e=>{
+    if(e.key==='Enter'){
+        if(document.getElementById('loginModal').classList.contains('active'))login();
+        if(document.getElementById('registerModal').classList.contains('active'))register();
+    }
+});
+
+// Инициализация
+for(let i=0;i<40;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(4+Math.random()*8)+'s';p.style.animationDelay=Math.random()*8+'s';document.getElementById('particles').appendChild(p)}
+updateNav();showPage('feed');if(uid)startHeartbeat();
+</script>
 </body>
 </html>
