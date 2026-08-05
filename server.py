@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
-from datetime import timedelta
+from datetime import datetime
 import os
 
 app = Flask(__name__)
@@ -11,12 +10,11 @@ CORS(app)
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'super-secret-key-123')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chirper.db'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-jwt = JWTManager(app)
 
+# Модели
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
@@ -27,7 +25,7 @@ class User(db.Model):
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(280), nullable=False)
-    timestamp = db.Column(db.DateTime, server_default=db.func.now())
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     likes = db.Column(db.Integer, default=0)
     author = db.relationship('User', backref='posts')
@@ -42,7 +40,7 @@ with app.app_context():
 
 @app.route('/')
 def home():
-    return jsonify({'status': 'online', 'message': 'Chirper API работает'})
+    return jsonify({'status': 'online'})
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -50,9 +48,6 @@ def register():
     username = data.get('username', '').strip()
     email = data.get('email', '').strip()
     password = data.get('password', '')
-    
-    if not username or not email or not password:
-        return jsonify({'error': 'Все поля обязательны'}), 400
     
     if User.query.filter_by(username=username).first():
         return jsonify({'error': 'Имя занято'}), 400
@@ -64,29 +59,17 @@ def register():
     db.session.add(user)
     db.session.commit()
     
-    token = create_access_token(identity=user.id)
-    return jsonify({
-        'token': token, 
-        'user': {'id': user.id, 'username': user.username, 'verified': user.verified}
-    })
+    return jsonify({'user_id': user.id, 'username': user.username, 'verified': user.verified})
 
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     email = data.get('email', '')
     password = data.get('password', '')
-    
-    if not email or not password:
-        return jsonify({'error': 'Email и пароль обязательны'}), 400
-    
     user = User.query.filter_by(email=email).first()
     
     if user and bcrypt.check_password_hash(user.password, password):
-        token = create_access_token(identity=user.id)
-        return jsonify({
-            'token': token, 
-            'user': {'id': user.id, 'username': user.username, 'verified': user.verified}
-        })
+        return jsonify({'user_id': user.id, 'username': user.username, 'verified': user.verified})
     return jsonify({'error': 'Неверный email или пароль'}), 401
 
 @app.route('/posts', methods=['GET'])
@@ -103,23 +86,20 @@ def get_posts():
         })
     return jsonify(result)
 
-@app.route('/post', methods=['POST', 'OPTIONS'])
-@jwt_required()
+@app.route('/post', methods=['POST'])
 def create_post():
-    if request.method == 'OPTIONS':
-        return '', 200
-    
     data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Нет данных'}), 400
-    
     content = data.get('content', '').strip()
-    user_id = get_jwt_identity()
+    user_id = data.get('user_id')
     
+    if not user_id:
+        return jsonify({'error': 'Не указан пользователь'}), 400
     if not content:
-        return jsonify({'error': 'Пост не может быть пустым'}), 400
-    if len(content) > 280:
-        return jsonify({'error': 'Максимум 280 символов'}), 400
+        return jsonify({'error': 'Пост пустой'}), 400
+    
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'Пользователь не найден'}), 400
     
     post = Post(content=content, user_id=user_id)
     db.session.add(post)
@@ -130,15 +110,11 @@ def create_post():
         'content': post.content,
         'likes': 0,
         'timestamp': post.timestamp.isoformat(),
-        'author': {'username': post.author.username, 'verified': post.author.verified}
+        'author': {'username': user.username, 'verified': user.verified}
     })
 
-@app.route('/like/<int:post_id>', methods=['POST', 'OPTIONS'])
-@jwt_required()
+@app.route('/like/<int:post_id>', methods=['POST'])
 def like(post_id):
-    if request.method == 'OPTIONS':
-        return '', 200
-    
     post = Post.query.get_or_404(post_id)
     post.likes += 1
     db.session.commit()
