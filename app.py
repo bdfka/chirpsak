@@ -74,8 +74,8 @@ with app.app_context():
         db.session.add(admin); db.session.commit()
 
 def u_dict(u):
-    if not u: return {}
-    return {'id':u.id,'username':u.username,'verified':u.verified,'badge_type':u.badge_type,'bio':u.bio or '','avatar_url':u.avatar_url or '','online':u.online,'last_seen':u.last_seen.isoformat()}
+    if not u: return {'username':'неизвестный','verified':False,'badge_type':'blue','bio':'','avatar_url':'','online':False,'last_seen':''}
+    return {'id':u.id,'username':u.username,'verified':u.verified,'badge_type':u.badge_type,'bio':u.bio or '','avatar_url':u.avatar_url or '','online':u.online,'last_seen':u.last_seen.isoformat() if u.last_seen else ''}
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -110,8 +110,18 @@ def heartbeat():
 
 @app.route('/posts', methods=['GET'])
 def posts():
-    ps=Post.query.order_by(Post.timestamp.desc()).limit(50).all()
-    return jsonify([{'id':p.id,'content':p.content,'likes':p.likes,'timestamp':p.timestamp.isoformat(),'author':u_dict(p.author)} for p in ps])
+    ps = Post.query.order_by(Post.timestamp.desc()).limit(50).all()
+    result = []
+    for p in ps:
+        author = User.query.get(p.user_id)
+        result.append({
+            'id': p.id,
+            'content': p.content,
+            'likes': p.likes,
+            'timestamp': p.timestamp.isoformat() if p.timestamp else '',
+            'author': u_dict(author)
+        })
+    return jsonify(result)
 
 @app.route('/post', methods=['POST'])
 def create_post():
@@ -139,8 +149,9 @@ def profile(username):
     fr=[]
     for f in Friendship.query.filter((Friendship.user1_id==u.id)|(Friendship.user2_id==u.id)).all():
         fid=f.user2_id if f.user1_id==u.id else f.user1_id
-        fr.append(u_dict(User.query.get(fid)))
-    return jsonify({'user':u_dict(u),'posts':[{'id':p.id,'content':p.content,'likes':p.likes,'timestamp':p.timestamp.isoformat()} for p in ps],'friends':fr})
+        friend=User.query.get(fid)
+        if friend: fr.append(u_dict(friend))
+    return jsonify({'user':u_dict(u),'posts':[{'id':p.id,'content':p.content,'likes':p.likes,'timestamp':p.timestamp.isoformat() if p.timestamp else ''} for p in ps],'friends':fr})
 
 @app.route('/verify', methods=['POST'])
 def verify():
@@ -283,7 +294,7 @@ def msgs(cid):
     result=[]
     for m in ms:
         sender=User.query.get(m.sender_id)
-        if sender: result.append({'id':m.id,'sender_id':m.sender_id,'content':m.content,'timestamp':m.timestamp.isoformat(),'delivered':m.delivered,'read':m.read,'sender':u_dict(sender)})
+        if sender: result.append({'id':m.id,'sender_id':m.sender_id,'content':m.content,'timestamp':m.timestamp.isoformat() if m.timestamp else '','delivered':m.delivered,'read':m.read,'sender':u_dict(sender)})
     return jsonify(result)
 
 @app.route('/chat/<int:cid>/message', methods=['POST'])
@@ -293,7 +304,7 @@ def send_msg(cid):
     if not sender_id: return jsonify({'error':'sender_id не передан'}),400
     m=Message(chat_id=cid,sender_id=int(sender_id),content=d.get('content',''))
     db.session.add(m);db.session.commit()
-    return jsonify({'id':m.id,'sender':u_dict(User.query.get(int(sender_id))),'content':m.content,'timestamp':m.timestamp.isoformat()})
+    return jsonify({'id':m.id,'sender':u_dict(User.query.get(int(sender_id))),'content':m.content,'timestamp':m.timestamp.isoformat() if m.timestamp else ''})
 
 @app.route('/')
 def index():
