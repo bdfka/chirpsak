@@ -2,10 +2,13 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_cors import CORS
 from datetime import timedelta
 import os
 
 app = Flask(__name__)
+CORS(app)
+
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'super-secret-key-123')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chirper.db'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
@@ -14,7 +17,6 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
-# Модели
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
@@ -30,7 +32,6 @@ class Post(db.Model):
     likes = db.Column(db.Integer, default=0)
     author = db.relationship('User', backref='posts')
 
-# Создание таблиц и админа
 with app.app_context():
     db.create_all()
     if not User.query.filter_by(username='admin').first():
@@ -39,7 +40,6 @@ with app.app_context():
         db.session.add(admin)
         db.session.commit()
 
-# API
 @app.route('/')
 def home():
     return jsonify({'status': 'online', 'message': 'Chirper API работает'})
