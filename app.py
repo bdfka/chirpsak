@@ -7,12 +7,24 @@ import os, uuid
 
 app = Flask(__name__)
 CORS(app)
-app.config['SECRET_KEY'] = 'secret-123'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chirper.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret-123')
+
+# Используем PostgreSQL, если доступен, иначе SQLite
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    # Render передаёт postgres://, но SQLAlchemy нужен postgresql://
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chirper.db'
+
 app.config['UPLOAD_FOLDER'] = 'static/avatars'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+
+# ... остальной код без изменений ...
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
